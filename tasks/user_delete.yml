@@ -1,49 +1,49 @@
 ---
 
-- name: list member groups for IAM user {{ entity_name }}
+- name: list member groups for IAM {{ entity_type }} {{ entity_name }}
   command: |
-    aws iam list-groups-for-user
-            --user-name '{{ entity_name }}'
+    aws iam list-groups-for-{{ entity_type }}
+            --{{ entity_type }}-name '{{ entity_name }}'
             --query 'Groups[*].GroupName'
             --profile '{{ profile }}'
   register: member_groups
   changed_when: False
 
-- name: set member groups fact for IAM user {{ entity_name }}
+- name: set member groups fact for IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     member_groups: '{{ member_groups.stdout | from_json }}'
 
-- name: remove IAM user {{ entity_name }} from groups
+- name: remove IAM {{ entity_type }} {{ entity_name }} from groups
   command: |
-    aws iam remove-user-from-group
+    aws iam remove-{{ entity_type }}-from-group
             --group-name '{{ item }}'
-            --user-name '{{ entity_name }}'
+            --{{ entity_type }}-name '{{ entity_name }}'
             --profile '{{ profile }}'
   with_items: member_groups
 
-- name: list policies attached to IAM user {{ entity_name }}
+- name: list policies attached to IAM {{ entity_type }} {{ entity_name }}
   command: |
-    aws iam list-attached-user-policies
-            --user-name '{{ entity_name }}'
+    aws iam list-attached-{{ entity_type }}-policies
+            --{{ entity_type }}-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
             --profile '{{ profile }}'
   register: attached_policies
   changed_when: False
 
-- name: set attached policies fact for IAM user {{ entity_name }}
+- name: set attached policies fact for IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     attached_policies: '{{ attached_policies.stdout | from_json }}'
 
-- name: remove all policies for IAM user {{ entity_name }}
+- name: remove all policies for IAM {{ entity_type }} {{ entity_name }}
   command: |
-    aws iam detach-user-policy
-            --user-name '{{ entity_name }}'
+    aws iam detach-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ profile }}'
   with_items: attached_policies
 
-- name: remove IAM user {{ entity_name }}
+- name: remove IAM {{ entity_type }} {{ entity_name }}
   command: |
-    aws iam delete-user
-            --user-name '{{ entity_name }}'
+    aws iam delete-{{ entity_type }}
+            --{{ entity_type }}-name '{{ entity_name }}'
             --profile '{{ profile }}'
