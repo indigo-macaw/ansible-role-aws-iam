@@ -1,59 +1,29 @@
 ---
 
+- include: entities_list.yml entity_type=group
+
 - include: entity_create.yml entity_type=group
   with_items: iam_groups
-
-- name: list existing IAM groups
-  command: |
-    aws iam list-groups
-            --query 'Groups[*].GroupName'
-            --profile '{{ profile }}'
-  register: existing_groups
-  changed_when: False
-
-- name: set existing IAM groups fact
-  set_fact:
-    existing_groups: '{{ existing_groups.stdout | from_json }}'
 
 - include: group_delete.yml
   with_items: existing_groups
   when: item not in iam_groups
 
 
+- include: entities_list.yml entity_type=user
+
 - include: entity_create.yml entity_type=user
   with_items: iam_users
-
-- name: list existing IAM users
-  command: |
-    aws iam list-users
-            --query 'Users[*].UserName'
-            --profile '{{ profile }}'
-  register: existing_users
-  changed_when: False
-
-- name: set existing IAM users fact
-  set_fact:
-    existing_users: '{{ existing_users.stdout | from_json }}'
 
 - include: user_delete.yml
   with_items: existing_users
   when: item not in iam_users
 
 
+- include: entities_list.yml entity_type=role
+
 - include: entity_create.yml entity_type=role
   with_items: iam_roles
-
-- name: list existing IAM roles
-  command: |
-    aws iam list-roles
-            --query 'Roles[*].RoleName'
-            --profile '{{ profile }}'
-  register: existing_roles
-  changed_when: False
-
-- name: set existing IAM roles fact
-  set_fact:
-    existing_roles: '{{ existing_roles.stdout | from_json }}'
 
 - include: role_delete.yml
   with_items: existing_roles

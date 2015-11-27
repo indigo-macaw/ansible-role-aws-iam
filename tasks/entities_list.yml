@@ -1,0 +1,18 @@
+---
+
+- name: set fact for configured IAM {{ entity_type }}s
+  set_fact:
+    configured_entities: '{{ vars["iam_" + entity_type + "s"] }}'
+    Entity_Type: '{{ entity_type | capitalize }}'
+
+- name: list existing IAM {{ entity_type }}s
+  command: |
+    aws iam list-{{ entity_type }}s
+            --query '{{ Entity_Type }}s[*].{{ Entity_Type }}Name'
+            --profile '{{ profile }}'
+  register: existing_entities
+  changed_when: False
+
+- name: set fact for existing IAM {{ entity_type }}s
+  set_fact:
+    existing_entities: '{{ existing_entities.stdout | from_json }}'
