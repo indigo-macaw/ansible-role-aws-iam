@@ -1,0 +1,48 @@
+---
+
+- name: set name fact for IAM user {{ item }}
+  set_fact:
+    iam_user: '{{ item }}'
+
+- name: create IAM user {{ iam_user }}
+  iam:
+    groups: '{{ iam_users[iam_user]["groups"] }}'
+    iam_type: user
+    name: '{{ iam_user }}'
+    profile: '{{ profile }}'
+    state: present
+
+- name: list policies attached to IAM user {{ iam_user }}
+  command: |
+    aws iam list-attached-user-policies
+            --user-name '{{ iam_user }}'
+            --query 'AttachedPolicies[*].PolicyArn'
+            --profile '{{ profile }}'
+  register: attached_policies
+  changed_when: False
+
+- name: set attached policies fact for IAM user {{ iam_user }}
+  set_fact:
+    attached_policies: '{{ attached_policies.stdout | from_json }}'
+
+- name: set configured policies fact for IAM user {{ iam_user }}
+  set_fact:
+    configured_policies: '{{ iam_users[iam_user]["policies"] | default([]) }}'
+
+- name: attach policies to IAM user {{ iam_user }}
+  command: |
+    aws iam attach-user-policy
+            --user-name '{{ iam_user }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: configured_policies
+  when: item not in attached_policies
+
+- name: detach policies from IAM user {{ iam_user }}
+  command: |
+    aws iam detach-user-policy
+            --user-name '{{ iam_user }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: attached_policies
+  when: item not in configured_policies

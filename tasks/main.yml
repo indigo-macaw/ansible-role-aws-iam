@@ -1,0 +1,7 @@
+---
+
+- include: group.yml
+  with_items: iam_groups
+
+- include: user.yml
+  with_items: iam_users

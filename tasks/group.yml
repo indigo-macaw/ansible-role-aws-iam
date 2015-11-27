@@ -1,0 +1,47 @@
+---
+
+- name: set name fact for IAM group {{ item }}
+  set_fact:
+    iam_group: '{{ item }}'
+
+- name: create IAM group {{ iam_group }}
+  iam:
+    iam_type: group
+    name: '{{ iam_group }}'
+    profile: '{{ profile }}'
+    state: present
+
+- name: list policies attached to IAM group {{ iam_group }}
+  command: |
+    aws iam list-attached-group-policies
+            --group-name '{{ iam_group }}'
+            --query 'AttachedPolicies[*].PolicyArn'
+            --profile '{{ profile }}'
+  register: attached_policies
+  changed_when: False
+
+- name: set attached policies fact for IAM group {{ iam_group }}
+  set_fact:
+    attached_policies: '{{ attached_policies.stdout | from_json }}'
+
+- name: set configured policies fact for IAM group {{ iam_group }}
+  set_fact:
+    configured_policies: '{{ iam_groups[iam_group]["policies"] | default([]) }}'
+
+- name: attach policies to IAM group {{ iam_group }}
+  command: |
+    aws iam attach-group-policy
+            --group-name '{{ iam_group }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: configured_policies
+  when: item not in attached_policies
+
+- name: detach policies from IAM group {{ iam_group }}
+  command: |
+    aws iam detach-group-policy
+            --group-name '{{ iam_group }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: attached_policies
+  when: item not in configured_policies
