@@ -5,11 +5,11 @@
     entity_name: '{{ item }}'
 
 - set_fact:
-    iam_entities: '{{ vars["iam_" + entity_type + "s"] }}'
+    configured_entities: '{{ vars["iam_" + entity_type + "s"] }}'
 
 - name: create IAM {{ entity_type }} {{ entity_name }}
   iam:
-    groups: '{{ iam_entities[entity_name]["groups"] | default(omit) }}'
+    groups: '{{ configured_entities[entity_name]["groups"] | default(omit) }}'
     iam_type: '{{ entity_type }}'
     name: '{{ entity_name }}'
     profile: '{{ profile }}'
@@ -30,7 +30,7 @@
 
 - name: set configured policies fact for IAM {{ entity_type }} {{ entity_name }}
   set_fact:
-    configured_policies: '{{ iam_entities[entity_name]["policies"]
+    configured_policies: '{{ configured_entities[entity_name]["policies"]
                              | default([]) }}'
 
 - name: attach policies to IAM {{ entity_type }} {{ entity_name }}
