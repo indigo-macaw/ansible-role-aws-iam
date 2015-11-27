@@ -28,7 +28,5 @@
 - name: remove IAM group {{ iam_group }}
   command: |
     aws iam delete-group
-            --group-name '{{ item }}'
+            --group-name '{{ iam_group }}'
             --profile '{{ profile }}'
-  with_items: existing_groups
-  when: item not in iam_groups
