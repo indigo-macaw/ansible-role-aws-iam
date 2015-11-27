@@ -5,7 +5,7 @@
 - include: entity_create.yml entity_type=group entity_name={{ item }}
   with_items: configured_entities
 
-- include: group_delete.yml                    entity_name={{ item }}
+- include: entity_delete.yml entity_type=group entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
 
@@ -15,7 +15,7 @@
 - include: entity_create.yml entity_type=user entity_name={{ item }}
   with_items: configured_entities
 
-- include: user_delete.yml                    entity_name={{ item }}
+- include: entity_delete.yml entity_type=user entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
 
@@ -25,6 +25,6 @@
 - include: entity_create.yml entity_type=role entity_name={{ item }}
   with_items: configured_entities
 
-- include: role_delete.yml                    entity_name={{ item }}
+- include: entity_delete.yml entity_type=role entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
