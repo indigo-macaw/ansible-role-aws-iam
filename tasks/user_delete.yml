@@ -1,8 +1,8 @@
 ---
 
-- name: set name fact for IAM user {{ item }}
+- name: set name fact for IAM user {{ entity_name }}
   set_fact:
-    iam_user: '{{ item }}'
+    iam_user: '{{ entity_name }}'
 
 - name: list member groups for IAM user {{ iam_user }}
   command: |

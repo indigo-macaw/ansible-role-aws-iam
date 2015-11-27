@@ -2,29 +2,29 @@
 
 - include: entities_list.yml entity_type=group
 
-- include: entity_create.yml entity_type=group
+- include: entity_create.yml entity_type=group entity_name={{ item }}
   with_items: iam_groups
 
-- include: group_delete.yml
+- include: group_delete.yml                    entity_name={{ item }}
   with_items: existing_groups
   when: item not in iam_groups
 
 
 - include: entities_list.yml entity_type=user
 
-- include: entity_create.yml entity_type=user
+- include: entity_create.yml entity_type=user entity_name={{ item }}
   with_items: iam_users
 
-- include: user_delete.yml
+- include: user_delete.yml                    entity_name={{ item }}
   with_items: existing_users
   when: item not in iam_users
 
 
 - include: entities_list.yml entity_type=role
 
-- include: entity_create.yml entity_type=role
+- include: entity_create.yml entity_type=role entity_name={{ item }}
   with_items: iam_roles
 
-- include: role_delete.yml
+- include: role_delete.yml                    entity_name={{ item }}
   with_items: existing_roles
   when: item not in iam_roles

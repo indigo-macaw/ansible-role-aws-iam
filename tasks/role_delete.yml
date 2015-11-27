@@ -1,8 +1,8 @@
 ---
 
-- name: set name fact for IAM role {{ item }}
+- name: set name fact for IAM role {{ entity_name }}
   set_fact:
-    iam_role: '{{ item }}'
+    iam_role: '{{ entity_name }}'
 
 - name: list instance profiles using IAM role {{ iam_role }}
   command: |

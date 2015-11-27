@@ -1,8 +1,8 @@
 ---
 
-- name: set name fact for IAM group {{ item }}
+- name: set name fact for IAM group {{ entity_name }}
   set_fact:
-    iam_group: '{{ item }}'
+    iam_group: '{{ entity_name }}'
 
 - name: list policies attached to IAM group {{ iam_group }}
   command: |
