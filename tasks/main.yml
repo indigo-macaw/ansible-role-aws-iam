@@ -3,7 +3,7 @@
 - include: entities_list.yml entity_type=group
 
 - include: entity_create.yml entity_type=group entity_name={{ item }}
-  with_items: iam_groups
+  with_items: configured_entities
 
 - include: group_delete.yml                    entity_name={{ item }}
   with_items: existing_entities
@@ -13,7 +13,7 @@
 - include: entities_list.yml entity_type=user
 
 - include: entity_create.yml entity_type=user entity_name={{ item }}
-  with_items: iam_users
+  with_items: configured_entities
 
 - include: user_delete.yml                    entity_name={{ item }}
   with_items: existing_entities
@@ -23,7 +23,7 @@
 - include: entities_list.yml entity_type=role
 
 - include: entity_create.yml entity_type=role entity_name={{ item }}
-  with_items: iam_roles
+  with_items: configured_entities
 
 - include: role_delete.yml                    entity_name={{ item }}
   with_items: existing_entities
