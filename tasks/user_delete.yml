@@ -1,53 +1,49 @@
 ---
 
-- name: set name fact for IAM user {{ entity_name }}
-  set_fact:
-    iam_user: '{{ entity_name }}'
-
-- name: list member groups for IAM user {{ iam_user }}
+- name: list member groups for IAM user {{ entity_name }}
   command: |
     aws iam list-groups-for-user
-            --user-name '{{ iam_user }}'
+            --user-name '{{ entity_name }}'
             --query 'Groups[*].GroupName'
             --profile '{{ profile }}'
   register: member_groups
   changed_when: False
 
-- name: set member groups fact for IAM user {{ iam_user }}
+- name: set member groups fact for IAM user {{ entity_name }}
   set_fact:
     member_groups: '{{ member_groups.stdout | from_json }}'
 
-- name: remove IAM user {{ iam_user }} from groups
+- name: remove IAM user {{ entity_name }} from groups
   command: |
     aws iam remove-user-from-group
             --group-name '{{ item }}'
-            --user-name '{{ iam_user }}'
+            --user-name '{{ entity_name }}'
             --profile '{{ profile }}'
   with_items: member_groups
 
-- name: list policies attached to IAM user {{ iam_user }}
+- name: list policies attached to IAM user {{ entity_name }}
   command: |
     aws iam list-attached-user-policies
-            --user-name '{{ iam_user }}'
+            --user-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
             --profile '{{ profile }}'
   register: attached_policies
   changed_when: False
 
-- name: set attached policies fact for IAM user {{ iam_user }}
+- name: set attached policies fact for IAM user {{ entity_name }}
   set_fact:
     attached_policies: '{{ attached_policies.stdout | from_json }}'
 
-- name: remove all policies for IAM user {{ iam_user }}
+- name: remove all policies for IAM user {{ entity_name }}
   command: |
     aws iam detach-user-policy
-            --user-name '{{ iam_user }}'
+            --user-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ profile }}'
   with_items: attached_policies
 
-- name: remove IAM user {{ iam_user }}
+- name: remove IAM user {{ entity_name }}
   command: |
     aws iam delete-user
-            --user-name '{{ iam_user }}'
+            --user-name '{{ entity_name }}'
             --profile '{{ profile }}'

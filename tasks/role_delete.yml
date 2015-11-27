@@ -1,54 +1,50 @@
 ---
 
-- name: set name fact for IAM role {{ entity_name }}
-  set_fact:
-    iam_role: '{{ entity_name }}'
-
-- name: list instance profiles using IAM role {{ iam_role }}
+- name: list instance profiles using IAM role {{ entity_name }}
   command: |
     aws iam list-instance-profiles-for-role
-            --role-name '{{ iam_role }}'
+            --role-name '{{ entity_name }}'
             --query 'InstanceProfiles[*].InstanceProfileName'
             --profile '{{ profile }}'
   register: instance_profiles
   changed_when: False
 
-- name: set instance profiles fact for IAM role {{ iam_role }}
+- name: set instance profiles fact for IAM role {{ entity_name }}
   set_fact:
     instance_profiles: '{{ instance_profiles.stdout | from_json }}'
 
-- name: remove IAM role {{ iam_role }} from instance profiles
+- name: remove IAM role {{ entity_name }} from instance profiles
   command: |
     aws iam remove-role-from-instance-profile
             --instance-profile-name '{{ item }}'
-            --role-name '{{ iam_role }}'
+            --role-name '{{ entity_name }}'
             --query 'InstanceProfiles[*].InstanceProfileName'
             --profile '{{ profile }}'
   with_items: instance_profiles
 
-- name: list policies attached to IAM role {{ iam_role }}
+- name: list policies attached to IAM role {{ entity_name }}
   command: |
     aws iam list-attached-role-policies
-            --role-name '{{ iam_role }}'
+            --role-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
             --profile '{{ profile }}'
   register: attached_policies
   changed_when: False
 
-- name: set attached policies fact for IAM role {{ iam_role }}
+- name: set attached policies fact for IAM role {{ entity_name }}
   set_fact:
     attached_policies: '{{ attached_policies.stdout | from_json }}'
 
-- name: remove all policies for IAM role {{ iam_role }}
+- name: remove all policies for IAM role {{ entity_name }}
   command: |
     aws iam detach-role-policy
-            --role-name '{{ iam_role }}'
+            --role-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ profile }}'
   with_items: attached_policies
 
-- name: remove IAM role {{ iam_role }}
+- name: remove IAM role {{ entity_name }}
   command: |
     aws iam delete-role
-            --role-name '{{ iam_role }}'
+            --role-name '{{ entity_name }}'
             --profile '{{ profile }}'

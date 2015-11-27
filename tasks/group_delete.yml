@@ -1,32 +1,28 @@
 ---
 
-- name: set name fact for IAM group {{ entity_name }}
-  set_fact:
-    iam_group: '{{ entity_name }}'
-
-- name: list policies attached to IAM group {{ iam_group }}
+- name: list policies attached to IAM group {{ entity_name }}
   command: |
     aws iam list-attached-group-policies
-            --group-name '{{ iam_group }}'
+            --group-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
             --profile '{{ profile }}'
   register: attached_policies
   changed_when: False
 
-- name: set attached policies fact for IAM group {{ iam_group }}
+- name: set attached policies fact for IAM group {{ entity_name }}
   set_fact:
     attached_policies: '{{ attached_policies.stdout | from_json }}'
 
-- name: remove all policies for IAM group {{ iam_group }}
+- name: remove all policies for IAM group {{ entity_name }}
   command: |
     aws iam detach-group-policy
-            --group-name '{{ iam_group }}'
+            --group-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ profile }}'
   with_items: attached_policies
 
-- name: remove IAM group {{ iam_group }}
+- name: remove IAM group {{ entity_name }}
   command: |
     aws iam delete-group
-            --group-name '{{ iam_group }}'
+            --group-name '{{ entity_name }}'
             --profile '{{ profile }}'
