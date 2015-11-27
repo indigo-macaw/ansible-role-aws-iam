@@ -1,0 +1,28 @@
+---
+
+- name: list policies attached to IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam list-attached-{{ entity_type }}-policies
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --query 'AttachedPolicies[*].PolicyArn'
+            --profile '{{ profile }}'
+  register: attached_policies
+  changed_when: False
+
+- name: set attached policies fact for IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    attached_policies: '{{ attached_policies.stdout | from_json }}'
+
+- name: remove all policies for IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam detach-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: attached_policies
+
+- name: remove IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam delete-{{ entity_type }}
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --profile '{{ profile }}'
