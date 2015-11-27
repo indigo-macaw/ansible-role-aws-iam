@@ -1,6 +1,6 @@
 ---
 
-- include: group.yml
+- include: create.yml entity=group
   with_items: iam_groups
 
 - name: list existing IAM groups
@@ -20,7 +20,7 @@
   when: item not in iam_groups
 
 
-- include: user.yml
+- include: create.yml entity=user
   with_items: iam_users
 
 - name: list existing IAM users
@@ -40,7 +40,7 @@
   when: item not in iam_users
 
 
-- include: role.yml
+- include: create.yml entity=role
   with_items: iam_roles
 
 - name: list existing IAM roles

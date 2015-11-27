@@ -1,0 +1,52 @@
+---
+
+- name: set name fact for IAM {{ entity }} {{ item }}
+  set_fact:
+    iam_entity: '{{ item }}'
+
+- set_fact:
+    iam_entities: '{{ vars["iam_" + entity + "s"] }}'
+
+- name: create IAM {{ entity }} {{ iam_entity }}
+  iam:
+    groups: '{{ iam_entities[iam_entity]["groups"] | default(omit) }}'
+    iam_type: '{{ entity }}'
+    name: '{{ iam_entity }}'
+    profile: '{{ profile }}'
+    state: present
+
+- name: list policies attached to IAM {{ entity }} {{ iam_entity }}
+  command: |
+    aws iam list-attached-{{ entity }}-policies
+            --{{ entity }}-name '{{ iam_entity }}'
+            --query 'AttachedPolicies[*].PolicyArn'
+            --profile '{{ profile }}'
+  register: attached_policies
+  changed_when: False
+
+- name: set attached policies fact for IAM {{ entity }} {{ iam_entity }}
+  set_fact:
+    attached_policies: '{{ attached_policies.stdout | from_json }}'
+
+- name: set configured policies fact for IAM {{ entity }} {{ iam_entity }}
+  set_fact:
+    configured_policies: '{{ iam_entities[iam_entity]["policies"]
+                             | default([]) }}'
+
+- name: attach policies to IAM {{ entity }} {{ iam_entity }}
+  command: |
+    aws iam attach-{{ entity }}-policy
+            --{{ entity }}-name '{{ iam_entity }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: configured_policies
+  when: item not in attached_policies
+
+- name: detach policies from IAM {{ entity }} {{ iam_entity }}
+  command: |
+    aws iam detach-{{ entity }}-policy
+            --{{ entity }}-name '{{ iam_entity }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: attached_policies
+  when: item not in configured_policies
