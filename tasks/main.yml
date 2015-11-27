@@ -6,8 +6,8 @@
   with_items: iam_groups
 
 - include: group_delete.yml                    entity_name={{ item }}
-  with_items: existing_groups
-  when: item not in iam_groups
+  with_items: existing_entities
+  when: item not in configured_entities
 
 
 - include: entities_list.yml entity_type=user
@@ -16,8 +16,8 @@
   with_items: iam_users
 
 - include: user_delete.yml                    entity_name={{ item }}
-  with_items: existing_users
-  when: item not in iam_users
+  with_items: existing_entities
+  when: item not in configured_entities
 
 
 - include: entities_list.yml entity_type=role
@@ -26,5 +26,5 @@
   with_items: iam_roles
 
 - include: role_delete.yml                    entity_name={{ item }}
-  with_items: existing_roles
-  when: item not in iam_roles
+  with_items: existing_entities
+  when: item not in configured_entities
