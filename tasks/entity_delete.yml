@@ -1,3 +1,6 @@
 ---
 
+- set_fact:
+    entity_name: '{{ entity_name }}'
+
 - include: '{{ entity_type }}_delete.yml'
