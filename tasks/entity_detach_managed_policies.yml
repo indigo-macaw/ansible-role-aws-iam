@@ -24,9 +24,3 @@
             --policy-arn '{{ item }}'
             --profile '{{ profile }}'
   with_items: attached_managed_policies
-
-- name: remove IAM {{ entity_type }} {{ entity_name }}
-  command: |
-    aws iam delete-{{ entity_type }}
-            --{{ entity_type }}-name '{{ entity_name }}'
-            --profile '{{ profile }}'

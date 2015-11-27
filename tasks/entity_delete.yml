@@ -6,3 +6,9 @@
 - include: entity_detach_managed_policies.yml
 
 - include: '{{ entity_type }}_delete.yml'
+
+- name: remove IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam delete-{{ entity_type }}
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --profile '{{ profile }}'
