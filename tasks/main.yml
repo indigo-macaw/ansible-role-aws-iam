@@ -38,3 +38,23 @@
 - include: user_delete.yml
   with_items: existing_users
   when: item not in iam_users
+
+
+- include: role.yml
+  with_items: iam_roles
+
+- name: list existing IAM roles
+  command: |
+    aws iam list-roles
+            --query 'Roles[*].RoleName'
+            --profile '{{ profile }}'
+  register: existing_roles
+  changed_when: False
+
+- name: set existing IAM roles fact
+  set_fact:
+    existing_roles: '{{ existing_roles.stdout | from_json }}'
+
+- include: role_delete.yml
+  with_items: existing_roles
+  when: item not in iam_roles

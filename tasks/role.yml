@@ -1,0 +1,47 @@
+---
+
+- name: set name fact for IAM role {{ item }}
+  set_fact:
+    iam_role: '{{ item }}'
+
+- name: create IAM role {{ iam_role }}
+  iam:
+    iam_type: role
+    name: '{{ iam_role }}'
+    profile: '{{ profile }}'
+    state: present
+
+- name: list policies attached to IAM role {{ iam_role }}
+  command: |
+    aws iam list-attached-role-policies
+            --role-name '{{ iam_role }}'
+            --query 'AttachedPolicies[*].PolicyArn'
+            --profile '{{ profile }}'
+  register: attached_policies
+  changed_when: False
+
+- name: set attached policies fact for IAM role {{ iam_role }}
+  set_fact:
+    attached_policies: '{{ attached_policies.stdout | from_json }}'
+
+- name: set configured policies fact for IAM role {{ iam_role }}
+  set_fact:
+    configured_policies: '{{ iam_roles[iam_role]["policies"] | default([]) }}'
+
+- name: attach policies to IAM role {{ iam_role }}
+  command: |
+    aws iam attach-role-policy
+            --role-name '{{ iam_role }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: configured_policies
+  when: item not in attached_policies
+
+- name: detach policies from IAM role {{ iam_role }}
+  command: |
+    aws iam detach-role-policy
+            --role-name '{{ iam_role }}'
+            --policy-arn '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: attached_policies
+  when: item not in configured_policies
