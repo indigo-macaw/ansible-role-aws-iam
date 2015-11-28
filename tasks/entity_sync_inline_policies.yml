@@ -32,6 +32,40 @@
   with_items: configured_inline_policies
   when: item not in embedded_inline_policies
 
+- name: get embedded inline policy documents for
+        IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam get-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: configured_inline_policies
+  register: get_policy
+  changed_when: False
+
+- name: construct embedded inline policy dictionary for
+        IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    embedded_inline_policy_documents:
+      '{{ embedded_inline_policy_documents
+          | default({})
+          | combine({item.0: (item.1.stdout | from_json).PolicyDocument}) }}'
+  with_together:
+  - configured_inline_policies
+  - get_policy.results
+
+- name: update modified inline policies for
+        IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam put-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --policy-document '{{ configured_inline_policies[item] | to_json }}'
+            --profile '{{ profile }}'
+  with_items: configured_inline_policies
+  when: embedded_inline_policy_documents[item]
+        !=    configured_inline_policies[item]
+
 - name: delete inline policies from IAM {{ entity_type }} {{ entity_name }}
   command: |
     aws iam delete-{{ entity_type }}-policy
