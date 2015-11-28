@@ -4,6 +4,7 @@
     entity_name: '{{ entity_name }}'
 
 - include: entity_detach_managed_policies.yml
+- include: entity_delete_inline_policies.yml
 
 - include: entity_remove_group_users.yml
   when: entity_type == 'group'
