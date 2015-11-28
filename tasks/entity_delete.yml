@@ -10,7 +10,11 @@
 - include: entity_remove_group_users.yml
   when: entity_type == 'group'
 
-- include: '{{ entity_type }}_delete.yml'
+- include: entity_remove_user_groups.yml
+  when: entity_type == 'user'
+
+- include: entity_remove_role_instance_profile.yml
+  when: entity_type == 'role'
 
 - name: remove IAM {{ entity_type }} {{ entity_name }}
   command: |
