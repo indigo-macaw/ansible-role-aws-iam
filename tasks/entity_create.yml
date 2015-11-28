@@ -18,3 +18,6 @@
 
 - include: entity_sync_managed_policies.yml
 - include: entity_sync_inline_policies.yml
+
+- include: entity_sync_assume_role_policy.yml
+  when: entity_type == 'role'

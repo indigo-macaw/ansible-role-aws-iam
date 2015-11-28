@@ -1,0 +1,28 @@
+---
+
+- name: get role assumption policy for
+        IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam get-{{ entity_type }}
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --query 'Role.AssumeRolePolicyDocument'
+            --profile '{{ profile }}'
+  register: assume_role_policy
+  changed_when: False
+
+- name: set role assumption policy fact for
+        IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    assume_role_policy: '{{ assume_role_policy.stdout | from_json }}'
+
+- name: update role assumption policy for
+        IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam update-assume-role-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-document
+              '{{ configured_entities[entity_name]["assume_role_policy"]
+                  | to_json }}'
+            --profile '{{ profile }}'
+  when:                                      assume_role_policy
+        != configured_entities[entity_name]["assume_role_policy"]
