@@ -1,5 +1,8 @@
 ---
 
+- set_fact:
+    entity_name: '{{ entity_name }}'
+
 - name: set configuration fact for IAM {{ entity_type }}s
   set_fact:
     configured_entities: '{{ vars["iam_" + entity_type + "s"] }}'
