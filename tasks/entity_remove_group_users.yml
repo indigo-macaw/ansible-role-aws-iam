@@ -1,0 +1,22 @@
+---
+
+- name: list members of IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam get-{{ entity_type }}
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --query 'Users[*].UserName'
+            --profile '{{ profile }}'
+  register: members
+  changed_when: False
+
+- name: set members fact for IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    members: '{{ members.stdout | from_json }}'
+
+- name: remove all members for IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam remove-user-from-{{ entity_type }}
+            --group-name '{{ entity_name }}'
+            --user-name '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: members
