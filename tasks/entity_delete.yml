@@ -1,6 +1,7 @@
 ---
 
-- set_fact:
+- name: set IAM entity name fact
+  set_fact:
     entity_name: '{{ entity_name }}'
 
 - include: entity_detach_managed_policies.yml
