@@ -2,7 +2,7 @@
 
 - name: set IAM entity name fact
   set_fact:
-    entity_name: '{{ entity_name }}'
+    entity_name: '{{ item }}'
 
 - include: entity_detach_managed_policies.yml
 - include: entity_delete_inline_policies.yml
