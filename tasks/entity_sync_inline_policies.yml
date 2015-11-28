@@ -1,0 +1,42 @@
+---
+
+- name: list inline policies embedded in
+        IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam list-{{ entity_type }}-policies
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --query 'PolicyNames'
+            --profile '{{ profile }}'
+  register: embedded_inline_policies
+  changed_when: False
+
+- name: set embedded inline policies fact for
+        IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    embedded_inline_policies:
+      '{{ embedded_inline_policies.stdout | from_json }}'
+
+- name: set configured inline policies fact for
+        IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    configured_inline_policies:
+      '{{ configured_entities[entity_name]["inline_policies"] | default ([]) }}'
+
+- name: embed inline policies in IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam put-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --policy-document '{{ configured_inline_policies[item] | to_json }}'
+            --profile '{{ profile }}'
+  with_items: configured_inline_policies
+  when: item not in embedded_inline_policies
+
+- name: delete inline policies from IAM {{ entity_type }} {{ entity_name }}
+  command: |
+    aws iam delete-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: embedded_inline_policies
+  when: item not in configured_inline_policies
