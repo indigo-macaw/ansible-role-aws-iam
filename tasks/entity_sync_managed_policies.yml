@@ -20,7 +20,7 @@
         IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     configured_managed_policies:
-      '{{ configured_entities[entity_name]["policies"] | default([]) }}'
+      '{{ configured_entities[entity_name]["managed_policies"] | default([]) }}'
 
 - name: attach managed policies to IAM {{ entity_type }} {{ entity_name }}
   command: |
