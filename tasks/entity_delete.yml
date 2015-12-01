@@ -17,7 +17,7 @@
   when: entity_type == 'role'
 
 - name: remove IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam delete-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --profile '{{ profile }}'

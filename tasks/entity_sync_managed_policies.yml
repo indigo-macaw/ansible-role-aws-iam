@@ -2,7 +2,7 @@
 
 - name: list managed policies attached to
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam list-attached-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
@@ -23,7 +23,7 @@
       '{{ configured_entities[entity_name]["managed_policies"] | default([]) }}'
 
 - name: attach managed policies to IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam attach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
@@ -32,7 +32,7 @@
   when: item not in attached_managed_policies
 
 - name: detach managed policies from IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam detach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'

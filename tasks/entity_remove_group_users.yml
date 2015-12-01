@@ -1,7 +1,7 @@
 ---
 
 - name: list members of IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam get-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'Users[*].UserName'
@@ -14,7 +14,7 @@
     members: '{{ members.stdout | from_json }}'
 
 - name: remove all members for IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam remove-user-from-{{ entity_type }}
             --group-name '{{ entity_name }}'
             --user-name '{{ item }}'

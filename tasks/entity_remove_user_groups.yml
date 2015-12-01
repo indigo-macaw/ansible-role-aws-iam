@@ -1,7 +1,7 @@
 ---
 
 - name: list member groups for IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam list-groups-for-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'Groups[*].GroupName'
@@ -14,7 +14,7 @@
     member_groups: '{{ member_groups.stdout | from_json }}'
 
 - name: remove IAM {{ entity_type }} {{ entity_name }} from groups
-  command: |
+  command: >
     aws iam remove-{{ entity_type }}-from-group
             --group-name '{{ item }}'
             --{{ entity_type }}-name '{{ entity_name }}'

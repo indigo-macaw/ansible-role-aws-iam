@@ -6,7 +6,7 @@
     Entity_Type: '{{ entity_type | capitalize }}'
 
 - name: list existing IAM {{ entity_type }}s
-  command: |
+  command: >
     aws iam list-{{ entity_type }}s
             --query '{{ Entity_Type }}s[*].{{ Entity_Type }}Name'
             --profile '{{ profile }}'

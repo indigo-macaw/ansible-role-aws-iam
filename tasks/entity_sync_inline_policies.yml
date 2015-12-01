@@ -2,7 +2,7 @@
 
 - name: list inline policies embedded in
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam list-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'PolicyNames'
@@ -23,7 +23,7 @@
       '{{ configured_entities[entity_name]["inline_policies"] | default ([]) }}'
 
 - name: embed inline policies in IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam put-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'
@@ -34,7 +34,7 @@
 
 - name: get embedded inline policy documents for
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam get-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'
@@ -56,7 +56,7 @@
 
 - name: update modified inline policies for
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam put-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'
@@ -67,7 +67,7 @@
         !=    configured_inline_policies[item]
 
 - name: delete inline policies from IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam delete-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'

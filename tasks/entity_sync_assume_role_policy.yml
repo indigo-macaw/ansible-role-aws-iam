@@ -2,7 +2,7 @@
 
 - name: get role assumption policy for
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam get-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'Role.AssumeRolePolicyDocument'
@@ -17,7 +17,7 @@
 
 - name: update role assumption policy for
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam update-assume-role-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-document

@@ -2,7 +2,7 @@
 
 - name: list managed policies attached to
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam list-attached-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
@@ -18,7 +18,7 @@
 
 - name: remove all managed policies for
         IAM {{ entity_type }} {{ entity_name }}
-  command: |
+  command: >
     aws iam detach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
