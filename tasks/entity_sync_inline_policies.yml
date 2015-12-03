@@ -89,3 +89,31 @@
             --profile '{{ profile }}'
   with_items: embedded_inline_policies
   when: item not in configured_inline_policies
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      updated inline policies
+      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      in <b>account {{ profile }}</b>
+    attachments:
+    - text:
+      mrkdwn_in: ['fields']
+      fields:
+
+      - title: old inline policies
+        value: >
+          {{ embedded_inline_policies
+             | default(["(none)"], true) | join(", ") }}
+        short: true
+
+      - title: new inline policies
+        value: >
+          {{ configured_inline_policies
+             | default(["(none)"], true) | join(", ") }}
+        short: true
+
+  when: >
+    notifier_role is defined and
+    embedded_inline_policies != configured_inline_policies
