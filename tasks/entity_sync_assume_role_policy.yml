@@ -26,3 +26,13 @@
             --profile '{{ profile }}'
   when:                                      assume_role_policy
         != configured_entities[entity_name]["assume_role_policy"]
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      updated role assumption policy for
+      <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      in <b>account {{ profile }}</b>
+  when:                                      assume_role_policy
+        != configured_entities[entity_name]["assume_role_policy"]
