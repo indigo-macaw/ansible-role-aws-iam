@@ -21,3 +21,11 @@
     aws iam delete-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --profile '{{ profile }}'
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      deleted <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      from <b>account {{ profile }}</b>
+  when: notifier_role is defined

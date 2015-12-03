@@ -1,5 +1,13 @@
 ---
 
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      started running role <b>aws-iam</b> on <b>account {{ profile }}</b>
+  when: notifier_role is defined
+
+
 - include: entities_list.yml entity_type=group
 
 - include: entity_create.yml entity_type=group entity_name={{ item }}
@@ -28,3 +36,11 @@
 - include: entity_delete.yml entity_type=role entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
+
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      finished running role <b>aws-iam</b> on <b>account {{ profile }}</b>
+  when: notifier_role is defined
