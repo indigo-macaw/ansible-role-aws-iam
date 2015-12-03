@@ -20,7 +20,8 @@
         IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     configured_inline_policies: >
-      {{ configured_entities[entity_name]["inline_policies"] | default ([]) }}
+      {{ configured_entities[entity_name]["inline_policies"].keys()
+         | default([]) }}
 
 - name: embed inline policies in IAM {{ entity_type }} {{ entity_name }}
   command: >
