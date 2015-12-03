@@ -13,14 +13,14 @@
 - name: set attached managed policies fact for
         IAM {{ entity_type }} {{ entity_name }}
   set_fact:
-    attached_managed_policies:
-      '{{ attached_managed_policies.stdout | from_json }}'
+    attached_managed_policies: >
+      {{ attached_managed_policies.stdout | from_json }}
 
 - name: set configured managed policies fact for
         IAM {{ entity_type }} {{ entity_name }}
   set_fact:
-    configured_managed_policies:
-      '{{ configured_entities[entity_name]["managed_policies"] | default([]) }}'
+    configured_managed_policies: >
+      {{ configured_entities[entity_name]["managed_policies"] | default([]) }}
 
 - name: attach managed policies to IAM {{ entity_type }} {{ entity_name }}
   command: >
