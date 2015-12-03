@@ -11,12 +11,12 @@
 
 - name: set member groups fact for IAM {{ entity_type }} {{ entity_name }}
   set_fact:
-    member_groups: '{{ member_groups.stdout | from_json }}'
+    member_groups: '{{ member_groups.stdout | from_json | sort }}'
 
 - name: set configured groups fact for IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     configured_groups:
-      '{{ configured_entities[entity_name]["groups"] | default([]) }}'
+      '{{ configured_entities[entity_name]["groups"] | default([]) | sort }}'
 
 - name: add IAM {{ entity_type }} {{ entity_name }} to groups
   command: >
@@ -35,3 +35,26 @@
             --profile '{{ profile }}'
   with_items: member_groups
   when: item not in configured_groups
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      updated group memberships
+      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      in <b>account {{ profile }}</b>
+    attachments:
+    - text:
+      fields:
+
+      - title: old group memberships
+        value: '{{ member_groups | default(["(none)"], true) | join(", ") }}'
+        short: true
+
+      - title: new group memberships
+        value: '{{ configured_groups | default(["(none)"], true) | join(", ") }}'
+        short: true
+
+  when: >
+    notifier_role is defined and
+    member_groups != configured_groups
