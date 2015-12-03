@@ -39,3 +39,33 @@
             --profile '{{ profile }}'
   with_items: attached_managed_policies
   when: item not in configured_managed_policies
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      updated attached managed policies
+      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      in <b>account {{ profile }}</b>
+    attachments:
+    - text:
+      mrkdwn_in: ['fields']
+      fields:
+
+      - title: old attached managed policies
+        value: >
+          {% for policy in attached_managed_policies
+          %}<pre>{{ policy }}</pre>{% if not loop.last %}<br/>{% endif
+          %}{% endfor %}
+        short: true
+
+      - title: new attached managed policies
+        value: >
+          {% for policy in configured_managed_policies
+          %}<pre>{{ policy }}</pre>{% if not loop.last %}<br/>{% endif
+          %}{% endfor %}
+        short: true
+
+  when: >
+    notifier_role is defined and
+    member_groups != configured_groups
