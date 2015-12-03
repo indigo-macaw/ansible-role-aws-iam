@@ -14,14 +14,14 @@
         IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     embedded_inline_policies: >
-      {{ embedded_inline_policies.stdout | from_json }}
+      {{ embedded_inline_policies.stdout | from_json | sort }}
 
 - name: set configured inline policies fact for
         IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     configured_inline_policies: >
       {{ configured_entities[entity_name]["inline_policies"].keys()
-         | default([]) }}
+         | default([]) | sort }}
 
 - name: embed inline policies in IAM {{ entity_type }} {{ entity_name }}
   command: >
