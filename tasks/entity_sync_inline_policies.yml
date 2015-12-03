@@ -74,7 +74,8 @@
     aws iam put-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'
-            --policy-document '{{ configured_inline_policies[item] | to_json }}'
+            --policy-document
+              '{{ configured_inline_policy_documents[item] | to_json }}'
             --profile '{{ profile }}'
   with_items: configured_inline_policies
   when: >
