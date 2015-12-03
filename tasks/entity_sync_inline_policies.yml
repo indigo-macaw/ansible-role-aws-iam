@@ -94,6 +94,18 @@
             --profile '{{ profile }}'
   with_items: updated_inline_policies
 
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      modified existing inline
+      {% if updated_inline_policies.__len__() == 1 -%}
+      policy{% else %}policies{% endif %}
+      <b>{{ updated_inline_policies | join(", ") }}</b>
+      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      in <b>account {{ profile }}</b>
+  when: updated_inline_policies
+
 - name: delete inline policies from IAM {{ entity_type }} {{ entity_name }}
   command: >
     aws iam delete-{{ entity_type }}-policy
