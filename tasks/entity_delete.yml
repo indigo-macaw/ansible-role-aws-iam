@@ -17,10 +17,12 @@
   when: entity_type == 'role'
 
 - name: remove IAM {{ entity_type }} {{ entity_name }}
-  command: >
-    aws iam delete-{{ entity_type }}
-            --{{ entity_type }}-name '{{ entity_name }}'
-            --profile '{{ profile }}'
+  iam:
+    iam_type: '{{ entity_type }}'
+    name: '{{ entity_name }}'
+    profile: '{{ profile }}'
+    state: absent
+  register: iam
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
