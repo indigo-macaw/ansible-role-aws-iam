@@ -30,4 +30,6 @@
     message: >
       deleted <b>IAM {{ entity_type }} {{ entity_name }}</b>
       from <b>account {{ profile }}</b>
-  when: notifier_role is defined
+  when: >
+    notifier_role is defined and
+    iam.changed

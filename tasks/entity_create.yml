@@ -15,6 +15,7 @@
     name: '{{ entity_name }}'
     profile: '{{ profile }}'
     state: present
+  register: iam
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
@@ -22,7 +23,9 @@
     message: >
       created <b>IAM {{ entity_type }} {{ entity_name }}</b>
       in <b>account {{ profile }}</b>
-  when: notifier_role is defined
+  when: >
+    notifier_role is defined and
+    iam.changed
 
 - include: entity_sync_managed_policies.yml
 - include: entity_sync_inline_policies.yml
