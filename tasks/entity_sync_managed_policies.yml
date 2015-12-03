@@ -68,4 +68,4 @@
 
   when: >
     notifier_role is defined and
-    member_groups != configured_groups
+    attached_managed_policies != configured_managed_policies
