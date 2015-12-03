@@ -1,0 +1,37 @@
+---
+
+- name: list member groups for IAM {{ entity_type }} {{ entity_name }}
+  command: >
+    aws iam list-groups-for-{{ entity_type }}
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --query 'Groups[*].GroupName'
+            --profile '{{ profile }}'
+  register: member_groups
+  changed_when: False
+
+- name: set member groups fact for IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    member_groups: '{{ member_groups.stdout | from_json }}'
+
+- name: set configured groups fact for IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    configured_groups:
+      '{{ configured_entities[entity_name]["groups"] | default([]) }}'
+
+- name: add IAM {{ entity_type }} {{ entity_name }} to groups
+  command: >
+    aws iam add-{{ entity_type }}-to-group
+            --group-name '{{ item }}'
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --profile '{{ profile }}'
+  with_items: configured_groups
+  when: item not in member_groups
+
+- name: remove IAM {{ entity_type }} {{ entity_name }} from groups
+  command: >
+    aws iam remove-{{ entity_type }}-from-group
+            --group-name '{{ item }}'
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --profile '{{ profile }}'
+  with_items: member_groups
+  when: item not in configured_groups

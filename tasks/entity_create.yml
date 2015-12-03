@@ -10,7 +10,6 @@
 
 - name: create IAM {{ entity_type }} {{ entity_name }}
   iam:
-    groups: '{{ configured_entities[entity_name]["groups"] | default(omit) }}'
     iam_type: '{{ entity_type }}'
     name: '{{ entity_name }}'
     profile: '{{ profile }}'
@@ -29,6 +28,9 @@
 
 - include: entity_sync_managed_policies.yml
 - include: entity_sync_inline_policies.yml
+
+- include: entity_sync_user_groups.yml
+  when: entity_type == 'user'
 
 - include: entity_sync_assume_role_policy.yml
   when: entity_type == 'role'
