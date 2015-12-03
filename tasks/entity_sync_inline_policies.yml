@@ -43,7 +43,7 @@
   register: get_policy
   changed_when: False
 
-- name: construct embedded inline policy dictionary for
+- name: set embedded inline policy documents fact for
         IAM {{ entity_type }} {{ entity_name }}
   set_fact:
     embedded_inline_policy_documents: >
