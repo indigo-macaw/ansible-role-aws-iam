@@ -68,6 +68,21 @@
   - configured_inline_policies
   - get_policy.results
 
+- name: set default updated inline policies fact for
+        IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    updated_inline_policies: []
+
+- name: set updated inline policies fact for
+        IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    updated_inline_policies: >
+      {{ updated_inline_policies | default([]) | union([item]) }}
+  with_items: configured_inline_policies
+  when: >
+    embedded_inline_policy_documents[item]
+    != configured_inline_policy_documents[item]
+
 - name: update modified inline policies for
         IAM {{ entity_type }} {{ entity_name }}
   command: >
@@ -77,10 +92,7 @@
             --policy-document
               '{{ configured_inline_policy_documents[item] | to_json }}'
             --profile '{{ profile }}'
-  with_items: configured_inline_policies
-  when: >
-    embedded_inline_policy_documents[item]
-    != configured_inline_policy_documents[item]
+  with_items: updated_inline_policies
 
 - name: delete inline policies from IAM {{ entity_type }} {{ entity_name }}
   command: >
