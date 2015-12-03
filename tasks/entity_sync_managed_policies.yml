@@ -55,6 +55,7 @@
 
       - title: old attached managed policies
         value: >
+          {% if not attached_managed_policies %}(none){% endif -%}
           {% for policy in attached_managed_policies
           %}<pre>{{ policy }}</pre>{% if not loop.last %}<br/>{% endif
           %}{% endfor %}
@@ -62,6 +63,7 @@
 
       - title: new attached managed policies
         value: >
+          {% if not configured_managed_policies %}(none){% endif -%}
           {% for policy in configured_managed_policies
           %}<pre>{{ policy }}</pre>{% if not loop.last %}<br/>{% endif
           %}{% endfor %}
