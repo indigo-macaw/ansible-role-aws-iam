@@ -29,12 +29,19 @@
          | default([]) | sort }}
   when: configured_entities[entity_name]["inline_policies"] is defined
 
+- name: set configured inline policy documents fact for
+        IAM {{ entity_type }} {{ entity_name }}
+  set_fact:
+    configured_inline_policy_documents: >
+      {{ configured_entities[entity_name]["inline_policies"] | default({}) }}
+
 - name: embed inline policies in IAM {{ entity_type }} {{ entity_name }}
   command: >
     aws iam put-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'
-            --policy-document '{{ configured_inline_policies[item] | to_json }}'
+            --policy-document
+              '{{ configured_inline_policy_documents[item] | to_json }}'
             --profile '{{ profile }}'
   with_items: configured_inline_policies
   when: item not in embedded_inline_policies
@@ -70,8 +77,9 @@
             --policy-document '{{ configured_inline_policies[item] | to_json }}'
             --profile '{{ profile }}'
   with_items: configured_inline_policies
-  when: embedded_inline_policy_documents[item]
-        !=    configured_inline_policies[item]
+  when: >
+    embedded_inline_policy_documents[item]
+    != configured_inline_policy_documents[item]
 
 - name: delete inline policies from IAM {{ entity_type }} {{ entity_name }}
   command: >
