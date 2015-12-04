@@ -30,8 +30,8 @@
   vars:
     message: >
       updated role assumption policy for
-      <b>{{ e }}</b>
-      in <b>account {{ profile }}</b>
+      <a href="{{ eurl }}">{{ e }}</a>
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
   when: >
     assume_role_policy
     != configured_entities[entity_name]["assume_role_policy"]

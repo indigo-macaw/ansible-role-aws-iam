@@ -18,6 +18,6 @@
       {% if added_inline_policies.__len__() == 1 -%}
       policy{% else %}policies{% endif %}
       <b>{{ added_inline_policies | join(", ") }}</b>
-      to <b>{{ e }}</b>
-      in <b>account {{ profile }}</b>
+      to <a href="{{ eurl }}">{{ e }}</a>
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
   when: added_inline_policies

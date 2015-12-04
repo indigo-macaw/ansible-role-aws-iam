@@ -43,8 +43,8 @@
   vars:
     message: >
       updated attached managed policies
-      for <b>{{ e }}</b>
-      in <b>account {{ profile }}</b>
+      for <a href="{{ eurl }}">{{ e }}</a>
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
     attachments:
     - text:
       mrkdwn_in: ['fields']

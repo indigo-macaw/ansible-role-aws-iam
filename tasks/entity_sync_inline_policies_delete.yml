@@ -16,6 +16,6 @@
       {% if deleted_inline_policies.__len__() == 1 -%}
       policy{% else %}policies{% endif %}
       <b>{{ deleted_inline_policies | join(", ") }}</b>
-      for <b>{{ e }}</b>
-      in <b>account {{ profile }}</b>
+      for <a href="{{ eurl }}">{{ e }}</a>
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
   when: deleted_inline_policies

@@ -41,8 +41,8 @@
   vars:
     message: >
       updated group memberships
-      for <b>{{ e }}</b>
-      in <b>account {{ profile }}</b>
+      for <a href="{{ eurl }}">{{ e }}</a>
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
     attachments:
     - text:
       fields:

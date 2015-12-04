@@ -30,7 +30,7 @@
   vars:
     message: >
       deleted <b>{{ e }}</b>
-      from <b>account {{ profile }}</b>
+      from <a href="{{ iam_url }}">account {{ profile }}</a>
   when: >
     notifier_role is defined and
     iam.changed

@@ -4,6 +4,7 @@
   set_fact:
     entity_name: '{{ item }}'
     e: 'IAM {{ entity_type }} {{ item }}'
+    eurl: https://console.aws.amazon.com/iam/home#{{ entity_type }}s/{{ item }}
 
 - name: set configuration fact for IAM {{ entity_type }}s
   set_fact:
@@ -21,8 +22,8 @@
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      created <b>{{ e }}</b>
-      in <b>account {{ profile }}</b>
+      created <a href="{{ eurl }}">{{ e }}</a>
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
   when: >
     notifier_role is defined and
     iam.changed

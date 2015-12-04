@@ -1,10 +1,16 @@
 ---
 
+- name: set global facts
+  set_fact:
+    iam_url: 'https://console.aws.amazon.com/iam/home#home'
+
+
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      started running role <b>aws-iam</b> on <b>account {{ profile }}</b>
+      started running role <b>aws-iam</b>
+      on <a href="{{ iam_url }}">account {{ profile }}</a>
   when: notifier_role is defined
 
 
@@ -63,5 +69,6 @@
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      finished running role <b>aws-iam</b> on <b>account {{ profile }}</b>
+      finished running role <b>aws-iam</b>
+      on <a href="{{ iam_url }}">account {{ profile }}</a>
   when: notifier_role is defined
