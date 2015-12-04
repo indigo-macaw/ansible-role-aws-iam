@@ -5,16 +5,16 @@
     entity_name: '{{ item }}'
     e: 'IAM {{ entity_type }} {{ item }}'
 
-- include: entity_detach_managed_policies.yml
-- include: entity_delete_inline_policies.yml
+- include: entity_purge_managed_policies.yml
+- include: entity_purge_inline_policies.yml
 
-- include: entity_remove_group_users.yml
+- include: entity_purge_group_users.yml
   when: entity_type == 'group'
 
-- include: entity_remove_user_groups.yml
+- include: entity_purge_user_groups.yml
   when: entity_type == 'user'
 
-- include: entity_remove_role_instance_profile.yml
+- include: entity_purge_role_instance_profile.yml
   when: entity_type == 'role'
 
 - name: remove {{ e }}
