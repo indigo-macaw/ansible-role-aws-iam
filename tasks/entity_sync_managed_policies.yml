@@ -20,14 +20,23 @@
       {{ configured_entities[entity_name]["managed_policies"]
          | default([]) | sort }}
 
+- name: set added managed policies fact for {{ e }}
+  set_fact:
+    added_managed_policies: >
+      {{ configured_managed_policies | difference(attached_managed_policies) }}
+
+- name: set removed managed policies fact for {{ e }}
+  set_fact:
+    removed_managed_policies: >
+      {{ attached_managed_policies | difference(configured_managed_policies) }}
+
 - name: attach managed policies to {{ e }}
   command: >
     aws iam attach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ profile }}'
-  with_items: configured_managed_policies
-  when: item not in attached_managed_policies
+  with_items: added_managed_policies
 
 - name: detach managed policies from {{ e }}
   command: >
@@ -35,8 +44,7 @@
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ profile }}'
-  with_items: attached_managed_policies
-  when: item not in configured_managed_policies
+  with_items: removed_managed_policies
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
