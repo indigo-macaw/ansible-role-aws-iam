@@ -8,32 +8,44 @@
   when: notifier_role is defined
 
 
-- include: entities_list.yml entity_type=group
+- name: set entity type fact to "group"
+  set_fact:
+    entity_type: group
 
-- include: entity_create.yml entity_type=group entity_name={{ item }}
+- include: entities_list.yml
+
+- include: entity_create.yml entity_name={{ item }}
   with_items: configured_entities
 
-- include: entity_delete.yml entity_type=group entity_name={{ item }}
+- include: entity_delete.yml entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
 
 
-- include: entities_list.yml entity_type=user
+- name: set entity type fact to "user"
+  set_fact:
+    entity_type: user
 
-- include: entity_create.yml entity_type=user entity_name={{ item }}
+- include: entities_list.yml
+
+- include: entity_create.yml entity_name={{ item }}
   with_items: configured_entities
 
-- include: entity_delete.yml entity_type=user entity_name={{ item }}
+- include: entity_delete.yml entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
 
 
-- include: entities_list.yml entity_type=role
+- name: set entity type fact to "role"
+  set_fact:
+    entity_type: role
 
-- include: entity_create.yml entity_type=role entity_name={{ item }}
+- include: entities_list.yml
+
+- include: entity_create.yml entity_name={{ item }}
   with_items: configured_entities
 
-- include: entity_delete.yml entity_type=role entity_name={{ item }}
+- include: entity_delete.yml entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
 
