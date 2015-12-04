@@ -1,0 +1,23 @@
+---
+
+- name: embed inline policies in {{ e }}
+  command: >
+    aws iam put-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --policy-document
+              '{{ configured_inline_policy_documents[item] | to_json }}'
+            --profile '{{ profile }}'
+  with_items: added_inline_policies
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      added inline
+      {% if added_inline_policies.__len__() == 1 -%}
+      policy{% else %}policies{% endif %}
+      <b>{{ added_inline_policies | join(", ") }}</b>
+      to <b>{{ e }}</b>
+      in <b>account {{ profile }}</b>
+  when: added_inline_policies

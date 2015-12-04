@@ -10,7 +10,11 @@
     configured_entities: '{{ vars["iam_" + entity_type + "s"] }}'
 
 - include: entity_sync_managed_policies.yml
-- include: entity_sync_inline_policies.yml
+
+- include: entity_sync_inline_policies_facts.yml
+- include: entity_sync_inline_policies_add.yml
+- include: entity_sync_inline_policies_delete.yml
+- include: entity_sync_inline_policies_update.yml
 
 - include: entity_sync_user_groups.yml
   when: entity_type == 'user'

@@ -1,0 +1,23 @@
+---
+
+- name: update modified inline policies for {{ e }}
+  command: >
+    aws iam put-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --policy-document
+              '{{ configured_inline_policy_documents[item] | to_json }}'
+            --profile '{{ profile }}'
+  with_items: updated_inline_policies
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      modified existing inline
+      {% if updated_inline_policies.__len__() == 1 -%}
+      policy{% else %}policies{% endif %}
+      <b>{{ updated_inline_policies | join(", ") }}</b>
+      for <b>{{ e }}</b>
+      in <b>account {{ profile }}</b>
+  when: updated_inline_policies

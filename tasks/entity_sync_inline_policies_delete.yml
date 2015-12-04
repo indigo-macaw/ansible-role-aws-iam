@@ -1,0 +1,21 @@
+---
+
+- name: delete inline policies from {{ e }}
+  command: >
+    aws iam delete-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: deleted_inline_policies
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      deleted inline
+      {% if deleted_inline_policies.__len__() == 1 -%}
+      policy{% else %}policies{% endif %}
+      <b>{{ deleted_inline_policies | join(", ") }}</b>
+      for <b>{{ e }}</b>
+      in <b>account {{ profile }}</b>
+  when: deleted_inline_policies

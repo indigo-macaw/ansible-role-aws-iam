@@ -1,0 +1,78 @@
+---
+
+- name: set default configured inline policies fact for {{ e }}
+  set_fact:
+    configured_inline_policies: []
+
+- name: set configured inline policies fact for {{ e }}
+  set_fact:
+    configured_inline_policies: >
+      {{ configured_entities[entity_name]["inline_policies"].keys()
+         | default([]) | sort }}
+  when: configured_entities[entity_name]["inline_policies"] is defined
+
+- name: set configured inline policy documents fact for {{ e }}
+  set_fact:
+    configured_inline_policy_documents: >
+      {{ configured_entities[entity_name]["inline_policies"] | default({}) }}
+
+
+- name: list inline policies embedded in {{ e }}
+  command: >
+    aws iam list-{{ entity_type }}-policies
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --query 'PolicyNames'
+            --profile '{{ profile }}'
+  register: embedded_inline_policies
+  changed_when: False
+
+- name: set embedded inline policies fact for {{ e }}
+  set_fact:
+    embedded_inline_policies: >
+      {{ embedded_inline_policies.stdout | from_json | sort }}
+
+- name: get embedded inline policy documents for {{ e }}
+  command: >
+    aws iam get-{{ entity_type }}-policy
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --policy-name '{{ item }}'
+            --profile '{{ profile }}'
+  with_items: configured_inline_policies
+  register: get_policy
+  changed_when: False
+
+- name: set embedded inline policy documents fact for {{ e }}
+  set_fact:
+    embedded_inline_policy_documents: >
+      {{ embedded_inline_policy_documents
+         | default({})
+         | combine({item.0: (item.1.stdout | from_json).PolicyDocument}) }}
+  with_together:
+  - configured_inline_policies
+  - get_policy.results
+
+
+- name: set added inline policies fact for {{ e }}
+  set_fact:
+    added_inline_policies: >
+      {{ configured_inline_policies | difference(embedded_inline_policies) }}
+
+
+- name: set deleted inline policies fact for {{ e }}
+  set_fact:
+    deleted_inline_policies: >
+      {{ embedded_inline_policies | difference(configured_inline_policies) }}
+
+
+- name: set default updated inline policies fact for {{ e }}
+  set_fact:
+    updated_inline_policies: []
+
+- name: set updated inline policies fact for {{ e }}
+  set_fact:
+    updated_inline_policies: >
+      {{ updated_inline_policies | default([]) | union([item]) }}
+  with_items: configured_inline_policies
+  when: >
+    embedded_inline_policy_documents[item]
+    != configured_inline_policy_documents[item]
