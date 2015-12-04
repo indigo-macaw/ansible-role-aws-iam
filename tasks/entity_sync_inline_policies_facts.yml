@@ -9,7 +9,8 @@
     configured_inline_policies: >
       {{ configured_entities[entity_name]["inline_policies"].keys()
          | default([]) | sort }}
-  when: configured_entities[entity_name]["inline_policies"] is defined
+  when: >
+    configured_entities[entity_name]["inline_policies"] is defined
 
 - name: set configured inline policy documents fact for {{ e }}
   set_fact:

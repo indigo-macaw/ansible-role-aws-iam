@@ -21,8 +21,9 @@
               '{{ configured_entities[entity_name]["assume_role_policy"]
                   | to_json }}'
             --profile '{{ profile }}'
-  when:                                      assume_role_policy
-        != configured_entities[entity_name]["assume_role_policy"]
+  when: >
+    assume_role_policy 
+    != configured_entities[entity_name]["assume_role_policy"]
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
@@ -31,5 +32,6 @@
       updated role assumption policy for
       <b>{{ e }}</b>
       in <b>account {{ profile }}</b>
-  when:                                      assume_role_policy
-        != configured_entities[entity_name]["assume_role_policy"]
+  when: >
+    assume_role_policy
+    != configured_entities[entity_name]["assume_role_policy"]
