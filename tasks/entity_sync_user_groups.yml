@@ -36,6 +36,21 @@
             --profile '{{ profile }}'
   with_items: added_groups
 
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      added <a href="{{ eurl }}">{{ e }}</a> to
+      {% if added_groups.__len__() == 1 -%}
+      group{% else -%}groups{% endif %}
+      {% for group in added_groups -%}
+      <a href="https://console.aws.amazon.com/iam/home#groups/{{
+        group }}">{{ group }}</a>{%
+      if not loop.last -%}, {% endif -%}
+      {% endfor %}
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
+  when: added_groups
+
 - name: remove {{ e }} from groups
   command: >
     aws iam remove-{{ entity_type }}-from-group
@@ -48,31 +63,13 @@
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      updated group memberships
-      for <a href="{{ eurl }}">{{ e }}</a>
+      removed <a href="{{ eurl }}">{{ e }}</a> from
+      {% if removed_groups.__len__() == 1 -%}
+      group{% else -%}groups{% endif %}
+      {% for group in removed_groups -%}
+      <a href="https://console.aws.amazon.com/iam/home#groups/{{
+        group }}">{{ group }}</a>{%
+      if not loop.last -%}, {% endif -%}
+      {% endfor %}
       in <a href="{{ iam_url }}">account {{ profile }}</a>
-    attachments:
-    - text:
-      fields:
-
-      - title: old group memberships
-        value: >
-          {% for group in member_groups
-          %}<a href="https://console.aws.amazon.com/iam/home#{{
-            entity_type }}s/{{ item }}">{{ group }}</a>{%
-          if not loop.last -%}, {% endif -%}
-          {% endfor -%}
-        short: true
-
-      - title: new group memberships
-        value: >
-          {% for group in configured_groups
-          %}<a href="https://console.aws.amazon.com/iam/home#{{
-            entity_type }}s/{{ item }}">{{ group }}</a>{%
-          if not loop.last -%}, {% endif -%}
-          {% endfor -%}
-        short: true
-
-  when: >
-    notifier_role is defined and
-    member_groups != configured_groups
+  when: removed_groups
