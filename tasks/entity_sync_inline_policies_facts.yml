@@ -72,7 +72,8 @@
   set_fact:
     updated_inline_policies: >
       {{ updated_inline_policies | default([]) | union([item]) }}
-  with_items: configured_inline_policies
+  with_items: >
+    {{ configured_inline_policies | intersect(embedded_inline_policies) }}
   when: >
     embedded_inline_policy_documents[item]
     != configured_inline_policy_documents[item]
