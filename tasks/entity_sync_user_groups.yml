@@ -18,14 +18,23 @@
     configured_groups:
       '{{ configured_entities[entity_name]["groups"] | default([]) | sort }}'
 
+- name: set added groups fact for {{ e }}
+  set_fact:
+    added_groups: >
+      {{ configured_groups | difference(member_groups) }}
+
+- name: set removed groups fact for {{ e }}
+  set_fact:
+    removed_groups: >
+      {{ member_groups | difference(configured_groups) }}
+
 - name: add {{ e }} to groups
   command: >
     aws iam add-{{ entity_type }}-to-group
             --group-name '{{ item }}'
             --{{ entity_type }}-name '{{ entity_name }}'
             --profile '{{ profile }}'
-  with_items: configured_groups
-  when: item not in member_groups
+  with_items: added_groups
 
 - name: remove {{ e }} from groups
   command: >
@@ -33,8 +42,7 @@
             --group-name '{{ item }}'
             --{{ entity_type }}-name '{{ entity_name }}'
             --profile '{{ profile }}'
-  with_items: member_groups
-  when: item not in configured_groups
+  with_items: removed_groups
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
