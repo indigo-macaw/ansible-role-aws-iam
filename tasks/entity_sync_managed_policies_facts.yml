@@ -1,0 +1,31 @@
+---
+
+- name: list managed policies attached to {{ e }}
+  command: >
+    aws iam list-attached-{{ entity_type }}-policies
+            --{{ entity_type }}-name '{{ entity_name }}'
+            --query 'AttachedPolicies[*].PolicyArn'
+            --profile '{{ profile }}'
+  register: attached_managed_policies
+  changed_when: False
+
+- name: set attached managed policies fact for {{ e }}
+  set_fact:
+    attached_managed_policies: >
+      {{ attached_managed_policies.stdout | from_json | sort }}
+
+- name: set configured managed policies fact for {{ e }}
+  set_fact:
+    configured_managed_policies: >
+      {{ configured_entities[entity_name]["managed_policies"]
+         | default([]) | sort }}
+
+- name: set added managed policies fact for {{ e }}
+  set_fact:
+    added_managed_policies: >
+      {{ configured_managed_policies | difference(attached_managed_policies) }}
+
+- name: set removed managed policies fact for {{ e }}
+  set_fact:
+    removed_managed_policies: >
+      {{ attached_managed_policies | difference(configured_managed_policies) }}

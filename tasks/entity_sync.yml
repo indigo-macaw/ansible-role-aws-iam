@@ -10,7 +10,9 @@
   set_fact:
     configured_entities: '{{ vars["iam_" + entity_type + "s"] }}'
 
-- include: entity_sync_managed_policies.yml
+- include: entity_sync_managed_policies_facts.yml
+- include: entity_sync_managed_policies_attach.yml
+- include: entity_sync_managed_policies_detach.yml
 
 - include: entity_sync_inline_policies_facts.yml
 - include: entity_sync_inline_policies_add.yml
