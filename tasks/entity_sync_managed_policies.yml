@@ -1,7 +1,6 @@
 ---
 
-- name: list managed policies attached to
-        IAM {{ entity_type }} {{ entity_name }}
+- name: list managed policies attached to {{ e }}
   command: >
     aws iam list-attached-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -10,20 +9,18 @@
   register: attached_managed_policies
   changed_when: False
 
-- name: set attached managed policies fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set attached managed policies fact for {{ e }}
   set_fact:
     attached_managed_policies: >
       {{ attached_managed_policies.stdout | from_json | sort }}
 
-- name: set configured managed policies fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set configured managed policies fact for {{ e }}
   set_fact:
     configured_managed_policies: >
       {{ configured_entities[entity_name]["managed_policies"]
          | default([]) | sort }}
 
-- name: attach managed policies to IAM {{ entity_type }} {{ entity_name }}
+- name: attach managed policies to {{ e }}
   command: >
     aws iam attach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -32,7 +29,7 @@
   with_items: configured_managed_policies
   when: item not in attached_managed_policies
 
-- name: detach managed policies from IAM {{ entity_type }} {{ entity_name }}
+- name: detach managed policies from {{ e }}
   command: >
     aws iam detach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -46,7 +43,7 @@
   vars:
     message: >
       updated attached managed policies
-      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      for <b>{{ e }}</b>
       in <b>account {{ profile }}</b>
     attachments:
     - text:

@@ -1,6 +1,6 @@
 ---
 
-- name: list member groups for IAM {{ entity_type }} {{ entity_name }}
+- name: list member groups for {{ e }}
   command: >
     aws iam list-groups-for-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -9,16 +9,16 @@
   register: member_groups
   changed_when: False
 
-- name: set member groups fact for IAM {{ entity_type }} {{ entity_name }}
+- name: set member groups fact for {{ e }}
   set_fact:
     member_groups: '{{ member_groups.stdout | from_json | sort }}'
 
-- name: set configured groups fact for IAM {{ entity_type }} {{ entity_name }}
+- name: set configured groups fact for {{ e }}
   set_fact:
     configured_groups:
       '{{ configured_entities[entity_name]["groups"] | default([]) | sort }}'
 
-- name: add IAM {{ entity_type }} {{ entity_name }} to groups
+- name: add {{ e }} to groups
   command: >
     aws iam add-{{ entity_type }}-to-group
             --group-name '{{ item }}'
@@ -27,7 +27,7 @@
   with_items: configured_groups
   when: item not in member_groups
 
-- name: remove IAM {{ entity_type }} {{ entity_name }} from groups
+- name: remove {{ e }} from groups
   command: >
     aws iam remove-{{ entity_type }}-from-group
             --group-name '{{ item }}'
@@ -41,7 +41,7 @@
   vars:
     message: >
       updated group memberships
-      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      for <b>{{ e }}</b>
       in <b>account {{ profile }}</b>
     attachments:
     - text:

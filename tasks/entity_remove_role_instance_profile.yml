@@ -1,6 +1,6 @@
 ---
 
-- name: list instance profiles using IAM {{ entity_type }} {{ entity_name }}
+- name: list instance profiles using {{ e }}
   command: >
     aws iam list-instance-profiles-for-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -9,11 +9,11 @@
   register: instance_profiles
   changed_when: False
 
-- name: set instance profiles fact for IAM {{ entity_type }} {{ entity_name }}
+- name: set instance profiles fact for {{ e }}
   set_fact:
     instance_profiles: '{{ instance_profiles.stdout | from_json }}'
 
-- name: remove IAM {{ entity_type }} {{ entity_name }} from instance profiles
+- name: remove {{ e }} from instance profiles
   command: >
     aws iam remove-{{ entity_type }}-from-instance-profile
             --instance-profile-name '{{ item }}'

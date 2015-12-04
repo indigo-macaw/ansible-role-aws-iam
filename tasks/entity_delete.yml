@@ -1,8 +1,9 @@
 ---
 
-- name: set IAM entity name fact
+- name: set IAM entity facts
   set_fact:
     entity_name: '{{ item }}'
+    e: 'IAM {{ entity_type }} {{ entity_name }}'
 
 - include: entity_detach_managed_policies.yml
 - include: entity_delete_inline_policies.yml
@@ -16,7 +17,7 @@
 - include: entity_remove_role_instance_profile.yml
   when: entity_type == 'role'
 
-- name: remove IAM {{ entity_type }} {{ entity_name }}
+- name: remove {{ e }}
   iam:
     iam_type: '{{ entity_type }}'
     name: '{{ entity_name }}'
@@ -28,7 +29,7 @@
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      deleted <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      deleted <b>{{ e }}</b>
       from <b>account {{ profile }}</b>
   when: >
     notifier_role is defined and

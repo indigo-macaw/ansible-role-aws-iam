@@ -1,14 +1,15 @@
 ---
 
-- name: set IAM entity name fact
+- name: set IAM entity facts
   set_fact:
     entity_name: '{{ item }}'
+    e: 'IAM {{ entity_type }} {{ entity_name }}'
 
 - name: set configuration fact for IAM {{ entity_type }}s
   set_fact:
     configured_entities: '{{ vars["iam_" + entity_type + "s"] }}'
 
-- name: create IAM {{ entity_type }} {{ entity_name }}
+- name: create {{ e }}
   iam:
     iam_type: '{{ entity_type }}'
     name: '{{ entity_name }}'
@@ -20,7 +21,7 @@
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      created <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      created <b>{{ e }}</b>
       in <b>account {{ profile }}</b>
   when: >
     notifier_role is defined and

@@ -1,6 +1,6 @@
 ---
 
-- name: list member groups for IAM {{ entity_type }} {{ entity_name }}
+- name: list member groups for {{ e }}
   command: >
     aws iam list-groups-for-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -9,11 +9,11 @@
   register: member_groups
   changed_when: False
 
-- name: set member groups fact for IAM {{ entity_type }} {{ entity_name }}
+- name: set member groups fact for {{ e }}
   set_fact:
     member_groups: '{{ member_groups.stdout | from_json }}'
 
-- name: remove IAM {{ entity_type }} {{ entity_name }} from groups
+- name: remove {{ e }} from groups
   command: >
     aws iam remove-{{ entity_type }}-from-group
             --group-name '{{ item }}'

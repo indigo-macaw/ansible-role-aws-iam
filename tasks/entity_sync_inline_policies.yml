@@ -1,7 +1,6 @@
 ---
 
-- name: list inline policies embedded in
-        IAM {{ entity_type }} {{ entity_name }}
+- name: list inline policies embedded in {{ e }}
   command: >
     aws iam list-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -10,32 +9,28 @@
   register: embedded_inline_policies
   changed_when: False
 
-- name: set embedded inline policies fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set embedded inline policies fact for {{ e }}
   set_fact:
     embedded_inline_policies: >
       {{ embedded_inline_policies.stdout | from_json | sort }}
 
-- name: set default configured inline policies fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set default configured inline policies fact for {{ e }}
   set_fact:
     configured_inline_policies: []
 
-- name: set configured inline policies fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set configured inline policies fact for {{ e }}
   set_fact:
     configured_inline_policies: >
       {{ configured_entities[entity_name]["inline_policies"].keys()
          | default([]) | sort }}
   when: configured_entities[entity_name]["inline_policies"] is defined
 
-- name: set configured inline policy documents fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set configured inline policy documents fact for {{ e }}
   set_fact:
     configured_inline_policy_documents: >
       {{ configured_entities[entity_name]["inline_policies"] | default({}) }}
 
-- name: embed inline policies in IAM {{ entity_type }} {{ entity_name }}
+- name: embed inline policies in {{ e }}
   command: >
     aws iam put-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -46,8 +41,7 @@
   with_items: configured_inline_policies
   when: item not in embedded_inline_policies
 
-- name: get embedded inline policy documents for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: get embedded inline policy documents for {{ e }}
   command: >
     aws iam get-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -57,8 +51,7 @@
   register: get_policy
   changed_when: False
 
-- name: set embedded inline policy documents fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set embedded inline policy documents fact for {{ e }}
   set_fact:
     embedded_inline_policy_documents: >
       {{ embedded_inline_policy_documents
@@ -68,13 +61,11 @@
   - configured_inline_policies
   - get_policy.results
 
-- name: set default updated inline policies fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set default updated inline policies fact for {{ e }}
   set_fact:
     updated_inline_policies: []
 
-- name: set updated inline policies fact for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: set updated inline policies fact for {{ e }}
   set_fact:
     updated_inline_policies: >
       {{ updated_inline_policies | default([]) | union([item]) }}
@@ -83,8 +74,7 @@
     embedded_inline_policy_documents[item]
     != configured_inline_policy_documents[item]
 
-- name: update modified inline policies for
-        IAM {{ entity_type }} {{ entity_name }}
+- name: update modified inline policies for {{ e }}
   command: >
     aws iam put-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -102,11 +92,11 @@
       {% if updated_inline_policies.__len__() == 1 -%}
       policy{% else %}policies{% endif %}
       <b>{{ updated_inline_policies | join(", ") }}</b>
-      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      for <b>{{ e }}</b>
       in <b>account {{ profile }}</b>
   when: updated_inline_policies
 
-- name: delete inline policies from IAM {{ entity_type }} {{ entity_name }}
+- name: delete inline policies from {{ e }}
   command: >
     aws iam delete-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
@@ -120,7 +110,7 @@
   vars:
     message: >
       updated inline policies
-      for <b>IAM {{ entity_type }} {{ entity_name }}</b>
+      for <b>{{ e }}</b>
       in <b>account {{ profile }}</b>
     attachments:
     - text:
