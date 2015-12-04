@@ -48,11 +48,21 @@
       fields:
 
       - title: old group memberships
-        value: '{{ member_groups | default(["(none)"], true) | join(", ") }}'
+        value: >
+          {% for group in member_groups
+          %}<a href="https://console.aws.amazon.com/iam/home#{{
+            entity_type }}s/{{ item }}">{{ group }}</a>{%
+          if not loop.last -%}, {% endif -%}
+          {% endfor -%}
         short: true
 
       - title: new group memberships
-        value: '{{ configured_groups | default(["(none)"], true) | join(", ") }}'
+        value: >
+          {% for group in configured_groups
+          %}<a href="https://console.aws.amazon.com/iam/home#{{
+            entity_type }}s/{{ item }}">{{ group }}</a>{%
+          if not loop.last -%}, {% endif -%}
+          {% endfor -%}
         short: true
 
   when: >
