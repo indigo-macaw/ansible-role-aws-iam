@@ -3,7 +3,7 @@
 - name: set IAM entity facts
   set_fact:
     entity_name: '{{ item }}'
-    e: 'IAM {{ entity_type }} {{ entity_name }}'
+    e: 'IAM {{ entity_type }} {{ item }}'
 
 - name: set configuration fact for IAM {{ entity_type }}s
   set_fact:
