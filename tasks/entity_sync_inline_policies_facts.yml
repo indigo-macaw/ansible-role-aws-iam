@@ -37,7 +37,7 @@
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'
             --profile '{{ profile }}'
-  with_items: configured_inline_policies
+  with_items: embedded_inline_policies
   register: get_policy
   changed_when: False
 
@@ -48,7 +48,7 @@
          | default({})
          | combine({item.0: (item.1.stdout | from_json).PolicyDocument}) }}
   with_together:
-  - configured_inline_policies
+  - embedded_inline_policies
   - get_policy.results
 
 
