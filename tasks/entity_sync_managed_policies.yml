@@ -38,6 +38,21 @@
             --profile '{{ profile }}'
   with_items: added_managed_policies
 
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      attached managed
+      {% if added_managed_policies.__len__() == 1 -%}
+      policy{% else -%}policies{% endif %}
+      {% for policy in added_managed_policies -%}
+      <b>{{ policy }}</b>{%
+      if not loop.last -%}, {% endif -%}
+      {% endfor %}
+      to <a href="{{ eurl }}">{{ e }}</a>
+      in <a href="{{ iam_url }}">account {{ profile }}</a>
+  when: added_managed_policies
+
 - name: detach managed policies from {{ e }}
   command: >
     aws iam detach-{{ entity_type }}-policy
@@ -50,30 +65,13 @@
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      updated attached managed policies
-      for <a href="{{ eurl }}">{{ e }}</a>
+      detached managed
+      {% if removed_managed_policies.__len__() == 1 -%}
+      policy{% else -%}policies{% endif %}
+      {% for policy in removed_managed_policies -%}
+      <b>{{ policy }}</b>{%
+      if not loop.last -%}, {% endif -%}
+      {% endfor %}
+      from <a href="{{ eurl }}">{{ e }}</a>
       in <a href="{{ iam_url }}">account {{ profile }}</a>
-    attachments:
-    - text:
-      mrkdwn_in: ['fields']
-      fields:
-
-      - title: old attached managed policies
-        value: >
-          {% if not attached_managed_policies %}(none){% endif -%}
-          {% for policy in attached_managed_policies
-          %}<pre>{{ policy }}</pre>{% if not loop.last %}<br/>{% endif
-          %}{% endfor %}
-        short: true
-
-      - title: new attached managed policies
-        value: >
-          {% if not configured_managed_policies %}(none){% endif -%}
-          {% for policy in configured_managed_policies
-          %}<pre>{{ policy }}</pre>{% if not loop.last %}<br/>{% endif
-          %}{% endfor %}
-        short: true
-
-  when: >
-    notifier_role is defined and
-    attached_managed_policies != configured_managed_policies
+  when: removed_managed_policies
