@@ -21,6 +21,9 @@
   with_items: existing_entities
   when: item not in configured_entities
 
+- include: entity_sync.yml entity_name={{ item }}
+  with_items: configured_entities
+
 
 - name: set entity type fact to "user"
   set_fact:
@@ -35,6 +38,9 @@
   with_items: existing_entities
   when: item not in configured_entities
 
+- include: entity_sync.yml entity_name={{ item }}
+  with_items: configured_entities
+
 
 - name: set entity type fact to "role"
   set_fact:
@@ -48,6 +54,9 @@
 - include: entity_delete.yml entity_name={{ item }}
   with_items: existing_entities
   when: item not in configured_entities
+
+- include: entity_sync.yml entity_name={{ item }}
+  with_items: configured_entities
 
 
 - name: call optional notifier
