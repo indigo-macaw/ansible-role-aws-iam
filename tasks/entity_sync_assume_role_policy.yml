@@ -33,5 +33,6 @@
       <a href="{{ eurl }}">{{ e }}</a>
       in <a href="{{ iam_url }}">account {{ profile }}</a>
   when: >
+    notifier_role is defined and
     assume_role_policy
     != configured_entities[entity_name]["assume_role_policy"]

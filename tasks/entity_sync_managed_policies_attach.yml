@@ -21,4 +21,6 @@
       {% endfor %}
       to <a href="{{ eurl }}">{{ e }}</a>
       in <a href="{{ iam_url }}">account {{ profile }}</a>
-  when: added_managed_policies
+  when: >
+    notifier_role is defined and
+    added_managed_policies

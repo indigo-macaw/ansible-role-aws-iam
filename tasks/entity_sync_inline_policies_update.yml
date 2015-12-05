@@ -20,4 +20,6 @@
       <b>{{ updated_inline_policies | join(", ") }}</b>
       for <a href="{{ eurl }}">{{ e }}</a>
       in <a href="{{ iam_url }}">account {{ profile }}</a>
-  when: updated_inline_policies
+  when: >
+    notifier_role is defined and
+    updated_inline_policies

@@ -49,7 +49,9 @@
       if not loop.last -%}, {% endif -%}
       {% endfor %}
       in <a href="{{ iam_url }}">account {{ profile }}</a>
-  when: added_groups
+  when: >
+    notifier_role is defined and
+    added_groups
 
 - name: remove {{ e }} from groups
   command: >
@@ -72,4 +74,6 @@
       if not loop.last -%}, {% endif -%}
       {% endfor %}
       in <a href="{{ iam_url }}">account {{ profile }}</a>
-  when: removed_groups
+  when: >
+    notifier_role is defined and
+    removed_groups
