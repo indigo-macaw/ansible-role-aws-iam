@@ -9,7 +9,7 @@
   command: >
     aws iam list-{{ entity_type }}s
             --query '{{ Entity_Type }}s[*].{{ Entity_Type }}Name'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   register: existing_entities
   changed_when: False
 

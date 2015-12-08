@@ -5,7 +5,7 @@
     aws iam list-groups-for-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'Groups[*].GroupName'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   register: member_groups
   changed_when: False
 
@@ -33,7 +33,7 @@
     aws iam add-{{ entity_type }}-to-group
             --group-name '{{ item }}'
             --{{ entity_type }}-name '{{ entity_name }}'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   with_items: added_groups
 
 - name: call optional notifier
@@ -48,7 +48,7 @@
         group }}">{{ group }}</a>{%
       if not loop.last -%}, {% endif -%}
       {% endfor %}
-      in <a href="{{ iam_url }}">account {{ profile }}</a>
+      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
     added_groups
@@ -58,7 +58,7 @@
     aws iam remove-{{ entity_type }}-from-group
             --group-name '{{ item }}'
             --{{ entity_type }}-name '{{ entity_name }}'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   with_items: removed_groups
 
 - name: call optional notifier
@@ -73,7 +73,7 @@
         group }}">{{ group }}</a>{%
       if not loop.last -%}, {% endif -%}
       {% endfor %}
-      in <a href="{{ iam_url }}">account {{ profile }}</a>
+      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
     removed_groups

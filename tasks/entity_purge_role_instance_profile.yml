@@ -5,7 +5,7 @@
     aws iam list-instance-profiles-for-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'InstanceProfiles[*].InstanceProfileName'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   register: instance_profiles
   changed_when: False
 
@@ -19,5 +19,5 @@
             --instance-profile-name '{{ item }}'
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'InstanceProfiles[*].InstanceProfileName'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   with_items: instance_profiles

@@ -21,7 +21,7 @@
   iam:
     iam_type: '{{ entity_type }}'
     name: '{{ entity_name }}'
-    profile: '{{ profile }}'
+    profile: '{{ aws_profile }}'
     state: absent
   register: iam
 
@@ -30,7 +30,7 @@
   vars:
     message: >
       deleted <b>{{ e }}</b>
-      from <a href="{{ iam_url }}">account {{ profile }}</a>
+      from <a href="{{ iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
     iam.changed

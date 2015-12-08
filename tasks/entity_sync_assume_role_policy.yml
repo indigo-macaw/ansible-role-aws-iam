@@ -5,7 +5,7 @@
     aws iam get-{{ entity_type }}
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'Role.AssumeRolePolicyDocument'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   register: assume_role_policy
   changed_when: False
 
@@ -20,7 +20,7 @@
             --policy-document
               '{{ configured_entities[entity_name]["assume_role_policy"]
                   | to_json }}'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   when: >
     assume_role_policy 
     != configured_entities[entity_name]["assume_role_policy"]
@@ -31,7 +31,7 @@
     message: >
       updated role assumption policy for
       <a href="{{ eurl }}">{{ e }}</a>
-      in <a href="{{ iam_url }}">account {{ profile }}</a>
+      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
     assume_role_policy

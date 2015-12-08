@@ -5,7 +5,7 @@
     aws iam list-attached-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   register: attached_managed_policies
   changed_when: False
 

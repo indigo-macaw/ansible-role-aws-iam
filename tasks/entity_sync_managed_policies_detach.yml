@@ -5,7 +5,7 @@
     aws iam detach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   with_items: removed_managed_policies
 
 - name: call optional notifier
@@ -20,7 +20,7 @@
       if not loop.last -%}, {% endif -%}
       {% endfor %}
       from <a href="{{ eurl }}">{{ e }}</a>
-      in <a href="{{ iam_url }}">account {{ profile }}</a>
+      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
     removed_managed_policies

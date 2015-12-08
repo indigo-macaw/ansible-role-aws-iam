@@ -5,7 +5,7 @@
     aws iam list-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'PolicyNames'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   register: embedded_inline_policies
   changed_when: False
 
@@ -19,5 +19,5 @@
     aws iam delete-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-name '{{ item }}'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   with_items: embedded_inline_policies

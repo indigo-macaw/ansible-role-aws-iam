@@ -7,7 +7,7 @@
             --policy-name '{{ item }}'
             --policy-document
               '{{ configured_inline_policy_documents[item] | to_json }}'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   with_items: updated_inline_policies
 
 - name: call optional notifier
@@ -19,7 +19,7 @@
       policy{% else %}policies{% endif %}
       <b>{{ updated_inline_policies | join(", ") }}</b>
       for <a href="{{ eurl }}">{{ e }}</a>
-      in <a href="{{ iam_url }}">account {{ profile }}</a>
+      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
     updated_inline_policies

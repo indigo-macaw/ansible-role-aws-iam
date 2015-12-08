@@ -5,7 +5,7 @@
     aws iam list-attached-{{ entity_type }}-policies
             --{{ entity_type }}-name '{{ entity_name }}'
             --query 'AttachedPolicies[*].PolicyArn'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   register: attached_managed_policies
   changed_when: False
 
@@ -19,5 +19,5 @@
     aws iam detach-{{ entity_type }}-policy
             --{{ entity_type }}-name '{{ entity_name }}'
             --policy-arn '{{ item }}'
-            --profile '{{ profile }}'
+            --profile '{{ aws_profile }}'
   with_items: attached_managed_policies
