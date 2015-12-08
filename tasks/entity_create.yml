@@ -8,7 +8,7 @@
 
 - name: set configuration fact for IAM {{ entity_type }}s
   set_fact:
-    configured_entities: '{{ vars["iam_" + entity_type + "s"] }}'
+    configured_entities: '{{ vars["aws_iam_" + entity_type + "s"] }}'
 
 - name: create {{ e }}
   iam:
