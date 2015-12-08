@@ -1,22 +1,22 @@
 ---
 
-- name: list member groups for {{ e }}
+- name: list member groups for {{ _aws_iam_e }}
   command: >
-    aws iam list-groups-for-{{ entity_type }}
-            --{{ entity_type }}-name '{{ entity_name }}'
+    aws iam list-groups-for-{{ _aws_iam_entity_type }}
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --query 'Groups[*].GroupName'
             --profile '{{ aws_profile }}'
-  register: member_groups
+  register: _aws_iam_member_groups
   changed_when: False
 
-- name: set member groups fact for {{ e }}
+- name: set member groups fact for {{ _aws_iam_e }}
   set_fact:
-    member_groups: '{{ member_groups.stdout | from_json }}'
+    _aws_iam_member_groups: '{{ _aws_iam_member_groups.stdout | from_json }}'
 
-- name: remove {{ e }} from groups
+- name: remove {{ _aws_iam_e }} from groups
   command: >
-    aws iam remove-{{ entity_type }}-from-group
+    aws iam remove-{{ _aws_iam_entity_type }}-from-group
             --group-name '{{ item }}'
-            --{{ entity_type }}-name '{{ entity_name }}'
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --profile '{{ aws_profile }}'
-  with_items: member_groups
+  with_items: _aws_iam_member_groups

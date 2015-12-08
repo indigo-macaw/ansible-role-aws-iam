@@ -1,22 +1,22 @@
 ---
 
-- name: list members of {{ e }}
+- name: list members of {{ _aws_iam_e }}
   command: >
-    aws iam get-{{ entity_type }}
-            --{{ entity_type }}-name '{{ entity_name }}'
+    aws iam get-{{ _aws_iam_entity_type }}
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --query 'Users[*].UserName'
             --profile '{{ aws_profile }}'
-  register: members
+  register: _aws_iam_members
   changed_when: False
 
-- name: set members fact for {{ e }}
+- name: set members fact for {{ _aws_iam_e }}
   set_fact:
-    members: '{{ members.stdout | from_json }}'
+    _aws_iam_members: '{{ _aws_iam_members.stdout | from_json }}'
 
-- name: remove all members for {{ e }}
+- name: remove all members for {{ _aws_iam_e }}
   command: >
-    aws iam remove-user-from-{{ entity_type }}
-            --group-name '{{ entity_name }}'
+    aws iam remove-user-from-{{ _aws_iam_entity_type }}
+            --group-name '{{ _aws_iam_entity_name }}'
             --user-name '{{ item }}'
             --profile '{{ aws_profile }}'
-  with_items: members
+  with_items: _aws_iam_members

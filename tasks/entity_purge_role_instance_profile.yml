@@ -1,23 +1,24 @@
 ---
 
-- name: list instance profiles using {{ e }}
+- name: list instance profiles using {{ _aws_iam_e }}
   command: >
-    aws iam list-instance-profiles-for-{{ entity_type }}
-            --{{ entity_type }}-name '{{ entity_name }}'
+    aws iam list-instance-profiles-for-{{ _aws_iam_entity_type }}
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --query 'InstanceProfiles[*].InstanceProfileName'
             --profile '{{ aws_profile }}'
-  register: instance_profiles
+  register: _aws_iam_instance_profiles
   changed_when: False
 
-- name: set instance profiles fact for {{ e }}
+- name: set instance profiles fact for {{ _aws_iam_e }}
   set_fact:
-    instance_profiles: '{{ instance_profiles.stdout | from_json }}'
+    _aws_iam_instance_profiles: >
+      {{ _aws_iam_instance_profiles.stdout | from_json }}
 
-- name: remove {{ e }} from instance profiles
+- name: remove {{ _aws_iam_e }} from instance profiles
   command: >
-    aws iam remove-{{ entity_type }}-from-instance-profile
+    aws iam remove-{{ _aws_iam_entity_type }}-from-instance-profile
             --instance-profile-name '{{ item }}'
-            --{{ entity_type }}-name '{{ entity_name }}'
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --query 'InstanceProfiles[*].InstanceProfileName'
             --profile '{{ aws_profile }}'
-  with_items: instance_profiles
+  with_items: _aws_iam_instance_profiles

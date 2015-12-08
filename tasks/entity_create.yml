@@ -2,28 +2,31 @@
 
 - name: set IAM entity facts
   set_fact:
-    entity_name: '{{ item }}'
-    e: 'IAM {{ entity_type }} {{ item }}'
-    eurl: https://console.aws.amazon.com/iam/home#{{ entity_type }}s/{{ item }}
+    _aws_iam_entity_name: '{{ item }}'
+    _aws_iam_e: 'IAM {{ _aws_iam_entity_type }} {{ item }}'
+    _aws_iam_eurl: >-
+      https://console.aws.amazon.com/iam/home#{{
+        _aws_iam_entity_type }}s/{{ item }}
 
-- name: set configuration fact for IAM {{ entity_type }}s
+- name: set configuration fact for IAM {{ _aws_iam_entity_type }}s
   set_fact:
-    configured_entities: '{{ vars["aws_iam_" + entity_type + "s"] }}'
+    _aws_iam_configured_entities: >
+      {{ vars["aws_iam_" + _aws_iam_entity_type + "s"] }}
 
-- name: create {{ e }}
+- name: create {{ _aws_iam_e }}
   iam:
-    iam_type: '{{ entity_type }}'
-    name: '{{ entity_name }}'
+    iam_type: '{{ _aws_iam_entity_type }}'
+    name: '{{ _aws_iam_entity_name }}'
     profile: '{{ aws_profile }}'
     state: present
-  register: iam
+  register: _aws_iam_create
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      created <a href="{{ eurl }}">{{ e }}</a>
-      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
+      created <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a>
+      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
-    iam.changed
+    _aws_iam_create.changed

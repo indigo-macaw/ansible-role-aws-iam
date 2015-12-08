@@ -1,19 +1,21 @@
 ---
 
-- name: set fact for configured IAM {{ entity_type }}s
+- name: set fact for configured IAM {{ _aws_iam_entity_type }}s
   set_fact:
-    configured_entities: >
-      {{ vars["aws_iam_" + entity_type + "s"] | default([]) }}
-    Entity_Type: '{{ entity_type | capitalize }}'
+    _aws_iam_configured_entities: >
+      {{ vars["aws_iam_" + _aws_iam_entity_type + "s"] | default([]) }}
+    _aws_iam_Entity_Type: '{{ _aws_iam_entity_type | capitalize }}'
 
-- name: list existing IAM {{ entity_type }}s
+- name: list existing IAM {{ _aws_iam_entity_type }}s
   command: >
-    aws iam list-{{ entity_type }}s
-            --query '{{ Entity_Type }}s[*].{{ Entity_Type }}Name'
+    aws iam list-{{ _aws_iam_entity_type }}s
+            --query
+              '{{ _aws_iam_Entity_Type }}s[*].{{ _aws_iam_Entity_Type }}Name'
             --profile '{{ aws_profile }}'
-  register: existing_entities
+  register: _aws_iam_existing_entities
   changed_when: False
 
-- name: set fact for existing IAM {{ entity_type }}s
+- name: set fact for existing IAM {{ _aws_iam_entity_type }}s
   set_fact:
-    existing_entities: '{{ existing_entities.stdout | from_json }}'
+    _aws_iam_existing_entities: >
+      {{ _aws_iam_existing_entities.stdout | from_json }}

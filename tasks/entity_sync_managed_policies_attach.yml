@@ -1,26 +1,26 @@
 ---
 
-- name: attach managed policies to {{ e }}
+- name: attach managed policies to {{ _aws_iam_e }}
   command: >
-    aws iam attach-{{ entity_type }}-policy
-            --{{ entity_type }}-name '{{ entity_name }}'
+    aws iam attach-{{ _aws_iam_entity_type }}-policy
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ aws_profile }}'
-  with_items: added_managed_policies
+  with_items: _aws_iam_added_managed_policies
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       attached managed
-      {% if added_managed_policies.__len__() == 1 -%}
+      {% if _aws_iam_added_managed_policies.__len__() == 1 -%}
       policy{% else -%}policies{% endif %}
-      {% for policy in added_managed_policies -%}
+      {% for policy in _aws_iam_added_managed_policies -%}
       <b>{{ policy }}</b>{%
       if not loop.last -%}, {% endif -%}
       {% endfor %}
-      to <a href="{{ eurl }}">{{ e }}</a>
-      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
+      to <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a>
+      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
-    added_managed_policies
+    _aws_iam_added_managed_policies

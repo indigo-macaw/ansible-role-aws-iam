@@ -1,79 +1,81 @@
 ---
 
-- name: list member groups for {{ e }}
+- name: list member groups for {{ _aws_iam_e }}
   command: >
-    aws iam list-groups-for-{{ entity_type }}
-            --{{ entity_type }}-name '{{ entity_name }}'
+    aws iam list-groups-for-{{ _aws_iam_entity_type }}
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --query 'Groups[*].GroupName'
             --profile '{{ aws_profile }}'
-  register: member_groups
+  register: _aws_iam_member_groups
   changed_when: False
 
-- name: set member groups fact for {{ e }}
+- name: set member groups fact for {{ _aws_iam_e }}
   set_fact:
-    member_groups: '{{ member_groups.stdout | from_json | sort }}'
+    _aws_iam_member_groups: >
+      {{ _aws_iam_member_groups.stdout | from_json | sort }}
 
-- name: set configured groups fact for {{ e }}
+- name: set configured groups fact for {{ _aws_iam_e }}
   set_fact:
-    configured_groups:
-      '{{ configured_entities[entity_name]["groups"] | default([]) | sort }}'
+    _aws_iam_configured_groups: >
+      {{ _aws_iam_configured_entities[entity_name]["groups"]
+         | default([]) | sort }}
 
-- name: set added groups fact for {{ e }}
+- name: set added groups fact for {{ _aws_iam_e }}
   set_fact:
-    added_groups: >
-      {{ configured_groups | difference(member_groups) }}
+    _aws_iam_added_groups: >
+      {{ _aws_iam_configured_groups | difference(_aws_iam_member_groups) }}
 
-- name: set removed groups fact for {{ e }}
+- name: set removed groups fact for {{ _aws_iam_e }}
   set_fact:
-    removed_groups: >
-      {{ member_groups | difference(configured_groups) }}
+    _aws_iam_removed_groups: >
+      {{ _aws_iam_member_groups | difference(_aws_iam_configured_groups) }}
 
-- name: add {{ e }} to groups
+- name: add {{ _aws_iam_e }} to groups
   command: >
-    aws iam add-{{ entity_type }}-to-group
+    aws iam add-{{ _aws_iam_entity_type }}-to-group
             --group-name '{{ item }}'
-            --{{ entity_type }}-name '{{ entity_name }}'
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --profile '{{ aws_profile }}'
-  with_items: added_groups
+  with_items: _aws_iam_added_groups
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      added <a href="{{ eurl }}">{{ e }}</a> to
-      {% if added_groups.__len__() == 1 -%}
+      added <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a> to
+      {% if _aws_iam_added_groups.__len__() == 1 -%}
       group{% else -%}groups{% endif %}
-      {% for group in added_groups -%}
+      {% for group in _aws_iam_added_groups -%}
       <a href="https://console.aws.amazon.com/iam/home#groups/{{
         group }}">{{ group }}</a>{%
       if not loop.last -%}, {% endif -%}
       {% endfor %}
-      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
+      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
-    added_groups
+    _aws_iam_added_groups
 
-- name: remove {{ e }} from groups
+- name: remove {{ _aws_iam_e }} from groups
   command: >
-    aws iam remove-{{ entity_type }}-from-group
+    aws iam remove-{{ _aws_iam_entity_type }}-from-group
             --group-name '{{ item }}'
-            --{{ entity_type }}-name '{{ entity_name }}'
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --profile '{{ aws_profile }}'
-  with_items: removed_groups
+  with_items: _aws_iam_removed_groups
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
-      removed <a href="{{ eurl }}">{{ e }}</a> from
-      {% if removed_groups.__len__() == 1 -%}
+      removed <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a> from
+      {% if _aws_iam_removed_groups.__len__() == 1 -%}
       group{% else -%}groups{% endif %}
-      {% for group in removed_groups -%}
+      {% for group in _aws_iam_removed_groups -%}
       <a href="https://console.aws.amazon.com/iam/home#groups/{{
         group }}">{{ group }}</a>{%
       if not loop.last -%}, {% endif -%}
       {% endfor %}
-      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
+      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
-    removed_groups
+    _aws_iam_removed_groups

@@ -1,25 +1,25 @@
 ---
 
-- name: embed inline policies in {{ e }}
+- name: embed inline policies in {{ _aws_iam_e }}
   command: >
-    aws iam put-{{ entity_type }}-policy
-            --{{ entity_type }}-name '{{ entity_name }}'
+    aws iam put-{{ _aws_iam_entity_type }}-policy
+            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --policy-name '{{ item }}'
             --policy-document
-              '{{ configured_inline_policy_documents[item] | to_json }}'
+              '{{ _aws_iam_configured_inline_policy_documents[item] | to_json }}'
             --profile '{{ aws_profile }}'
-  with_items: added_inline_policies
+  with_items: _aws_iam_added_inline_policies
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       added inline
-      {% if added_inline_policies.__len__() == 1 -%}
+      {% if _aws_iam_added_inline_policies.__len__() == 1 -%}
       policy{% else %}policies{% endif %}
-      <b>{{ added_inline_policies | join(", ") }}</b>
-      to <a href="{{ eurl }}">{{ e }}</a>
-      in <a href="{{ iam_url }}">account {{ aws_profile }}</a>
+      <b>{{ _aws_iam_added_inline_policies | join(", ") }}</b>
+      to <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a>
+      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
   when: >
     notifier_role is defined and
-    added_inline_policies
+    _aws_iam_added_inline_policies
