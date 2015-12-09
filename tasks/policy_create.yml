@@ -1,0 +1,26 @@
+---
+
+- name: set IAM managed policy facts
+  set_fact:
+    _aws_iam_policy_name: '{{ item }}'
+    _aws_iam_p: 'IAM managed policy {{ item }}'
+    _aws_iam_purl: >-
+      https://console.aws.amazon.com/iam/home#policies/arn:aws:iam::{{
+        aws_account }}:policy/{{ item }}
+
+- name: create {{ _aws_iam_p }}
+  command: >
+    aws iam create-policy
+            --policy-name '{{ _aws_iam_policy_name }}'
+            --policy-document
+              '{{ _aws_iam_configured_policies[item] | to_json }}'
+            --profile '{{ aws_profile }}'
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      created <a href="{{ _aws_iam_purl }}">{{ _aws_iam_p }}</a>
+      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+  when: >
+    notifier_role is defined

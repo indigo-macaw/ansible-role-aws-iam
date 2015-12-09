@@ -1,0 +1,20 @@
+---
+
+- name: set configured IAM managed policies fact
+  set_fact:
+    _aws_iam_configured_policies: >
+      {{ vars["aws_iam_policies"] | default([]) }}
+
+- name: list existing IAM managed policies
+  command: >
+    aws iam list-policies
+            --query 'Policies[*].PolicyName'
+            --scope Local
+            --profile '{{ aws_profile }}'
+  register: _aws_iam_existing_policies
+  changed_when: False
+
+- name: set existing IAM managed policies fact
+  set_fact:
+    _aws_iam_existing_policies: >
+      {{ _aws_iam_existing_policies.stdout | from_json }}

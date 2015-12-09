@@ -1,0 +1,99 @@
+---
+
+- name: set IAM managed policy facts
+  set_fact:
+    _aws_iam_policy_name: '{{ item }}'
+    _aws_iam_p: 'IAM managed policy {{ item }}'
+    _aws_iam_purl: >-
+      https://console.aws.amazon.com/iam/home#policies/arn:aws:iam::{{
+        aws_account }}:policy/{{ item }}
+
+
+- name: get IAM managed policy attached entities
+  command: >
+    aws iam list-entities-for-policy
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --profile '{{ aws_profile }}'
+  register: _aws_iam_policy_attached_entities
+  changed_when: False
+
+- name: set IAM managed policy attached entities fact
+  set_fact:
+    _aws_iam_policy_attached_entities: >
+      {{ _aws_iam_policy_attached_entities.stdout | from_json }}
+
+- name: detach groups from IAM managed policy
+  command: >
+    aws iam detach-group-policy
+            --group-name '{{ item }}'
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --profile '{{ aws_profile }}'
+  with_items: >
+    {{ _aws_iam_policy_attached_entities["PolicyGroups"]
+       | map(attribute="GroupName") | list }}
+
+- name: detach users from IAM managed policy
+  command: >
+    aws iam detach-user-policy
+            --user-name '{{ item }}'
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --profile '{{ aws_profile }}'
+  with_items: >
+    {{ _aws_iam_policy_attached_entities["PolicyUsers"]
+       | map(attribute="UserName") | list }}
+
+- name: detach roles from IAM managed policy
+  command: >
+    aws iam detach-role-policy
+            --role-name '{{ item }}'
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --profile '{{ aws_profile }}'
+  with_items: >
+    {{ _aws_iam_policy_attached_entities["PolicyRoles"]
+       | map(attribute="RoleName") | list }}
+
+
+- name: get all non-default IAM managed policy versions
+  command: >
+    aws iam list-policy-versions
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --query 'Versions[?IsDefaultVersion == `false`].VersionId'
+            --profile '{{ aws_profile }}'
+  register: _aws_iam_existing_policy_nondefault_versions
+  changed_when: False
+
+- name: set all non-default IAM managed policy versions fact
+  set_fact:
+    _aws_iam_existing_policy_nondefault_versions: >
+      {{ _aws_iam_existing_policy_nondefault_versions.stdout | from_json }}
+
+- name: delete all non-default IAM managed policy versions
+  command: >
+    aws iam delete-policy-version
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --version-id '{{ item }}'
+            --profile '{{ aws_profile }}'
+  with_items: _aws_iam_existing_policy_nondefault_versions
+
+
+- name: remove {{ _aws_iam_p }}
+  command: >
+    aws iam delete-policy
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --profile '{{ aws_profile }}'
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      deleted <b>{{ _aws_iam_p }}</b>
+      from <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+  when: >
+    notifier_role is defined

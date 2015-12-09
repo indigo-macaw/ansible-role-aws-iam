@@ -14,6 +14,20 @@
   when: notifier_role is defined
 
 
+- include: policy_list.yml
+
+- include: policy_create.yml policy_name={{ item }}
+  with_items: _aws_iam_configured_policies
+  when: item not in _aws_iam_existing_policies
+
+- include: policy_delete.yml policy_name={{ item }}
+  with_items: _aws_iam_existing_policies
+  when: item not in _aws_iam_configured_policies
+
+- include: policy_sync.yml policy_name={{ item }}
+  with_items: _aws_iam_configured_policies
+
+
 - name: set entity type fact to "group"
   set_fact:
     _aws_iam_entity_type: group

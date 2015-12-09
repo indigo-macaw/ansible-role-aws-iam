@@ -1,0 +1,123 @@
+---
+
+- name: set IAM managed policy facts
+  set_fact:
+    _aws_iam_policy_name: '{{ item }}'
+    _aws_iam_p: 'IAM managed policy {{ item }}'
+    _aws_iam_purl: >-
+      https://console.aws.amazon.com/iam/home#policies/arn:aws:iam::{{
+        aws_account }}:policy/{{ item }}
+
+
+- name: set configured IAM managed policy document fact
+  set_fact:
+    _aws_iam_configured_policy_document: >
+      {{ _aws_iam_configured_policies[_aws_iam_policy_name] | default({}) }}
+
+
+- name: get existing IAM managed policy default version
+  command: >
+    aws iam list-policy-versions
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --query 'Versions[?IsDefaultVersion == `true`].VersionId'
+            --output text
+            --profile '{{ aws_profile }}'
+  register: _aws_iam_existing_policy_default_version
+  changed_when: False
+
+- name: set existing IAM managed policy default version fact
+  set_fact:
+    _aws_iam_existing_policy_default_version: >-
+      {{ _aws_iam_existing_policy_default_version.stdout }}
+
+
+- name: get existing IAM managed policy document
+  command: >
+    aws iam get-policy-version
+            --policy-arn
+              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --query 'PolicyVersion.Document'
+            --version-id '{{ _aws_iam_existing_policy_default_version }}'
+            --profile '{{ aws_profile }}'
+  register: _aws_iam_existing_policy_document
+  changed_when: False
+
+- name: set existing IAM managed policy document fact
+  set_fact:
+    _aws_iam_existing_policy_document: >
+      {{ _aws_iam_existing_policy_document.stdout | from_json }}
+
+
+- block:
+
+    - name: count existing IAM managed policy versions
+      command: >
+        aws iam list-policy-versions
+                --policy-arn
+                  'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                --query 'Versions | length(@)'
+                --output text
+                --profile '{{ aws_profile }}'
+      register: _aws_iam_existing_policy_version_count
+      changed_when: False
+
+    - name: set existing IAM managed policy versions count fact
+      set_fact:
+        _aws_iam_existing_policy_version_count: >-
+          {{ _aws_iam_existing_policy_version_count.stdout }}
+
+    - block:
+
+        - name: get oldest non-default IAM managed policy version
+          command: >
+            aws iam list-policy-versions
+                    --policy-arn
+                      'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                    --query 'Versions[*] | sort_by(@, &CreateDate)[0].VersionId'
+                    --output text
+                    --profile '{{ aws_profile }}'
+          register: _aws_iam_existing_policy_oldest_version
+          changed_when: False
+
+        - name: set oldest non-default IAM managed policy version fact
+          set_fact:
+            _aws_iam_existing_policy_oldest_version: >-
+              {{ _aws_iam_existing_policy_oldest_version.stdout }}
+
+        - name: delete oldest non-default IAM managed policy version
+          command: >
+            aws iam delete-policy-version
+                    --policy-arn
+                      'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                    --version-id
+                      '{{ _aws_iam_existing_policy_oldest_version }}'
+                    --profile '{{ aws_profile }}'
+
+      when: (_aws_iam_existing_policy_version_count | int) >= 5
+
+    - name: update IAM managed policy
+      command: >
+        aws iam create-policy-version
+                --policy-arn
+                  'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                --policy-document
+                  '{{ _aws_iam_configured_policy_document | to_json }}'
+                --set-as-default
+                --profile '{{ aws_profile }}'
+      when: >
+        _aws_iam_existing_policy_document
+        != _aws_iam_configured_policy_document
+
+    - name: call optional notifier
+      include: 'roles/{{ notifier_role }}/tasks/main.yml'
+      vars:
+        message: >
+          updated <a href="{{ _aws_iam_purl }}">{{ _aws_iam_p }}</a>
+          in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+      when: >
+        notifier_role is defined
+
+  when: >
+    _aws_iam_existing_policy_document
+    != _aws_iam_configured_policy_document
