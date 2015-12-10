@@ -1,0 +1,54 @@
+---
+
+- name: set IAM SAML provider facts
+  set_fact:
+    _aws_iam_saml_provider_arn: '{{ item }}'
+    _aws_iam_idp: 'IAM SAML provider {{ item.split("/")[1] }}'
+    _aws_iam_idpurl: >-
+      https://console.aws.amazon.com/iam/home#providers/{{ item }}
+
+
+- name: set configured IAM SAML provider metadata fact
+  set_fact:
+    _aws_iam_configured_saml_provider_metadata: >
+      {{ _aws_iam_configured_saml_providers[_aws_iam_saml_provider_arn]["metadata"] }}
+
+
+- name: get existing IAM SAML provider metadata
+  command: >
+    aws iam get-saml-provider
+            --saml-provider-arn '{{ _aws_iam_saml_provider_arn }}'
+            --query 'SAMLMetadataDocument'
+            --output text
+            --profile '{{ aws_profile }}'
+  register: _aws_iam_existing_saml_provider_metadata
+  changed_when: False
+
+- name: set existing IAM SAML provider metadata fact
+  set_fact:
+    _aws_iam_existing_saml_provider_metadata: >
+      {{ _aws_iam_existing_saml_provider_metadata.stdout }}
+
+
+- block:
+
+    - name: update IAM SAML provider
+      command: >
+        aws iam update-saml-provider
+                --saml-provider-arn '{{ _aws_iam_saml_provider_arn }}'
+                --saml-metadata-document
+                  '{{ _aws_iam_configured_saml_provider_metadata }}'
+                --profile '{{ aws_profile }}'
+
+    - name: call optional notifier
+      include: 'roles/{{ notifier_role }}/tasks/main.yml'
+      vars:
+        message: >
+          updated <a href="{{ _aws_iam_idpurl }}">{{ _aws_iam_idp }}</a>
+          in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+      when: >
+        notifier_role is defined
+
+  when: >
+    _aws_iam_existing_saml_provider_metadata
+    != _aws_iam_configured_saml_provider_metadata

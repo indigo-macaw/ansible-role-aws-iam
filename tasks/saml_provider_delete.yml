@@ -1,0 +1,23 @@
+---
+
+- name: set IAM SAML provider facts
+  set_fact:
+    _aws_iam_saml_provider_arn: '{{ item }}'
+    _aws_iam_idp: 'IAM SAML provider {{ item.split("/")[1] }}'
+    _aws_iam_idpurl: >-
+      https://console.aws.amazon.com/iam/home#providers/{{ item }}
+
+- name: remove {{ _aws_iam_idp }}
+  command: >
+    aws iam delete-saml-provider
+            --saml-provider-arn '{{ _aws_iam_saml_provider_arn }}'
+            --profile '{{ aws_profile }}'
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      deleted <b>{{ _aws_iam_idp }}</b>
+      from <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+  when: >
+    notifier_role is defined

@@ -1,0 +1,25 @@
+---
+
+- name: set IAM SAML provider facts
+  set_fact:
+    _aws_iam_saml_provider_arn: '{{ item }}'
+    _aws_iam_idp: 'IAM SAML provider {{ item.split("/")[1] }}'
+    _aws_iam_idpurl: >-
+      https://console.aws.amazon.com/iam/home#providers/{{ item }}
+
+- name: create {{ _aws_iam_idp }}
+  command: >
+    aws iam create-saml-provider
+            --name '{{ _aws_iam_saml_provider_arn.split("/")[1] }}'
+            --saml-metadata-document
+              '{{ _aws_iam_configured_saml_providers[item]["metadata"] }}'
+            --profile '{{ aws_profile }}'
+
+- name: call optional notifier
+  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  vars:
+    message: >
+      created <a href="{{ _aws_iam_idpurl }}">{{ _aws_iam_idp }}</a>
+      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+  when: >
+    notifier_role is defined
