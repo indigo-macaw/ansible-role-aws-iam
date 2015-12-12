@@ -13,7 +13,7 @@
     aws iam create-policy
             --policy-name '{{ _aws_iam_policy_name }}'
             --policy-document
-              '{{ _aws_iam_configured_policies[item] | to_json }}'
+              '{{ _aws_iam_configured_policies[item] | to_nice_json }}'
             --profile '{{ aws_profile }}'
 
 - name: call optional notifier

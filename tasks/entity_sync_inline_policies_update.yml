@@ -6,7 +6,8 @@
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --policy-name '{{ item }}'
             --policy-document
-              '{{ _aws_iam_configured_inline_policy_documents[item] | to_json }}'
+              '{{ _aws_iam_configured_inline_policy_documents[item]
+                  | to_nice_json }}'
             --profile '{{ aws_profile }}'
   with_items: _aws_iam_updated_inline_policies
 

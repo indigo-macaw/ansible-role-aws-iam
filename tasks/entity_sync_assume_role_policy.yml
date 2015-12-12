@@ -20,7 +20,7 @@
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --policy-document
               '{{ _aws_iam_configured_entities[entity_name]["assume_role_policy"]
-                  | to_json }}'
+                  | to_nice_json }}'
             --profile '{{ aws_profile }}'
   when: >
     _aws_iam_assume_role_policy 

@@ -102,7 +102,7 @@
                 --policy-arn
                   'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
                 --policy-document
-                  '{{ _aws_iam_configured_policy_document | to_json }}'
+                  '{{ _aws_iam_configured_policy_document | to_nice_json }}'
                 --set-as-default
                 --profile '{{ aws_profile }}'
       when: >
