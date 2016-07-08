@@ -17,29 +17,29 @@
 - include: saml_provider_list.yml
 
 - include: saml_provider_create.yml saml_provider_name={{ item }}
-  with_items: _aws_iam_configured_saml_providers
+  with_items: '{{ _aws_iam_configured_saml_providers }}'
   when: item not in _aws_iam_existing_saml_providers
 
 - include: saml_provider_delete.yml saml_provider_name={{ item }}
-  with_items: _aws_iam_existing_saml_providers
+  with_items: '{{ _aws_iam_existing_saml_providers }}'
   when: item not in _aws_iam_configured_saml_providers
 
 - include: saml_provider_sync.yml saml_provider_name={{ item }}
-  with_items: _aws_iam_configured_saml_providers
+  with_items: '{{ _aws_iam_configured_saml_providers }}'
 
 
 - include: policy_list.yml
 
 - include: policy_create.yml policy_name={{ item }}
-  with_items: _aws_iam_configured_policies
+  with_items: '{{ _aws_iam_configured_policies }}'
   when: item not in _aws_iam_existing_policies
 
 - include: policy_delete.yml policy_name={{ item }}
-  with_items: _aws_iam_existing_policies
+  with_items: '{{ _aws_iam_existing_policies }}'
   when: item not in _aws_iam_configured_policies
 
 - include: policy_sync.yml policy_name={{ item }}
-  with_items: _aws_iam_configured_policies
+  with_items: '{{ _aws_iam_configured_policies }}'
 
 
 - name: set entity type fact to "group"
@@ -49,14 +49,14 @@
 - include: entities_list.yml
 
 - include: entity_create.yml entity_name={{ item }}
-  with_items: _aws_iam_configured_entities
+  with_items: '{{ _aws_iam_configured_entities }}'
 
 - include: entity_delete.yml entity_name={{ item }}
-  with_items: _aws_iam_existing_entities
+  with_items: '{{ _aws_iam_existing_entities }}'
   when: item not in _aws_iam_configured_entities
 
 - include: entity_sync.yml entity_name={{ item }}
-  with_items: _aws_iam_configured_entities
+  with_items: '{{ _aws_iam_configured_entities }}'
 
 
 - name: set entity type fact to "user"
@@ -66,14 +66,14 @@
 - include: entities_list.yml
 
 - include: entity_create.yml entity_name={{ item }}
-  with_items: _aws_iam_configured_entities
+  with_items: '{{ _aws_iam_configured_entities }}'
 
 - include: entity_delete.yml entity_name={{ item }}
-  with_items: _aws_iam_existing_entities
+  with_items: '{{ _aws_iam_existing_entities }}'
   when: item not in _aws_iam_configured_entities
 
 - include: entity_sync.yml entity_name={{ item }}
-  with_items: _aws_iam_configured_entities
+  with_items: '{{ _aws_iam_configured_entities }}'
 
 
 - name: set entity type fact to "role"
@@ -83,14 +83,14 @@
 - include: entities_list.yml
 
 - include: entity_create.yml entity_name={{ item }}
-  with_items: _aws_iam_configured_entities
+  with_items: '{{ _aws_iam_configured_entities }}'
 
 - include: entity_delete.yml entity_name={{ item }}
-  with_items: _aws_iam_existing_entities
+  with_items: '{{ _aws_iam_existing_entities }}'
   when: item not in _aws_iam_configured_entities
 
 - include: entity_sync.yml entity_name={{ item }}
-  with_items: _aws_iam_configured_entities
+  with_items: '{{ _aws_iam_configured_entities }}'
 
 
 - name: call optional notifier

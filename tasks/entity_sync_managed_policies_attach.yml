@@ -6,7 +6,7 @@
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --policy-arn '{{ item }}'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_added_managed_policies
+  with_items: '{{ _aws_iam_added_managed_policies }}'
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'

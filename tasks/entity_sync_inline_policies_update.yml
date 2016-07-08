@@ -9,7 +9,7 @@
               '{{ _aws_iam_configured_inline_policy_documents[item]
                   | to_nice_json }}'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_updated_inline_policies
+  with_items: '{{ _aws_iam_updated_inline_policies }}'
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'

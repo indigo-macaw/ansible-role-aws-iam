@@ -39,7 +39,7 @@
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --policy-name '{{ item }}'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_embedded_inline_policies
+  with_items: '{{ _aws_iam_embedded_inline_policies }}'
   register: _aws_iam_get_policy
   changed_when: False
 
@@ -50,8 +50,8 @@
          | default({})
          | combine({item.0: (item.1.stdout | from_json).PolicyDocument}) }}
   with_together:
-  - _aws_iam_embedded_inline_policies
-  - _aws_iam_get_policy.results
+    - '{{ _aws_iam_embedded_inline_policies }}'
+    - '{{ _aws_iam_get_policy.results }}'
 
 
 - name: set added inline policies fact for {{ _aws_iam_e }}

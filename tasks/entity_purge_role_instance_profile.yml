@@ -21,4 +21,4 @@
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --query 'InstanceProfiles[*].InstanceProfileName'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_instance_profiles
+  with_items: '{{ _aws_iam_instance_profiles }}'

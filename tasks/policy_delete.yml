@@ -79,7 +79,7 @@
               'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
             --version-id '{{ item }}'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_existing_policy_nondefault_versions
+  with_items: '{{ _aws_iam_existing_policy_nondefault_versions }}'
 
 
 - name: remove {{ _aws_iam_p }}

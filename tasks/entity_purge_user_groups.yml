@@ -19,4 +19,4 @@
             --group-name '{{ item }}'
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_member_groups
+  with_items: '{{ _aws_iam_member_groups }}'

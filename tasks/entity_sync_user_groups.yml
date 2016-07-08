@@ -36,7 +36,7 @@
             --group-name '{{ item }}'
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_added_groups
+  with_items: '{{ _aws_iam_added_groups }}'
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
@@ -61,7 +61,7 @@
             --group-name '{{ item }}'
             --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
             --profile '{{ aws_profile }}'
-  with_items: _aws_iam_removed_groups
+  with_items: '{{ _aws_iam_removed_groups }}'
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
