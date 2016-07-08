@@ -17,7 +17,7 @@
 - name: set configured groups fact for {{ _aws_iam_e }}
   set_fact:
     _aws_iam_configured_groups: >
-      {{ _aws_iam_configured_entities[entity_name]["groups"]
+      {{ _aws_iam_configured_entities[_aws_iam_entity_name]["groups"]
          | default([]) | sort }}
 
 - name: set added groups fact for {{ _aws_iam_e }}

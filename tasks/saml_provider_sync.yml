@@ -2,10 +2,11 @@
 
 - name: set IAM SAML provider facts
   set_fact:
-    _aws_iam_saml_provider_arn: '{{ item }}'
-    _aws_iam_idp: 'IAM SAML provider {{ item.split("/")[1] }}'
+    _aws_iam_idp: >-
+      IAM SAML provider {{ _aws_iam_saml_provider_arn.split("/")[1] }}
     _aws_iam_idpurl: >-
-      https://console.aws.amazon.com/iam/home#providers/{{ item }}
+      https://console.aws.amazon.com/iam/home#providers/{{
+        _aws_iam_saml_provider_arn }}
 
 
 - name: set configured IAM SAML provider metadata fact

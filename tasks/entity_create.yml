@@ -2,11 +2,10 @@
 
 - name: set IAM entity facts
   set_fact:
-    _aws_iam_entity_name: '{{ item }}'
-    _aws_iam_e: 'IAM {{ _aws_iam_entity_type }} {{ item }}'
+    _aws_iam_e: 'IAM {{ _aws_iam_entity_type }} {{ _aws_iam_entity_name }}'
     _aws_iam_eurl: >-
       https://console.aws.amazon.com/iam/home#{{
-        _aws_iam_entity_type }}s/{{ item }}
+        _aws_iam_entity_type }}s/{{ _aws_iam_entity_name }}
 
 - name: set configuration fact for IAM {{ _aws_iam_entity_type }}s
   set_fact:

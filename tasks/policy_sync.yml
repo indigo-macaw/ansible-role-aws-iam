@@ -2,11 +2,10 @@
 
 - name: set IAM managed policy facts
   set_fact:
-    _aws_iam_policy_name: '{{ item }}'
-    _aws_iam_p: 'IAM managed policy {{ item }}'
+    _aws_iam_p: 'IAM managed policy {{ _aws_iam_policy_name }}'
     _aws_iam_purl: >-
       https://console.aws.amazon.com/iam/home#policies/arn:aws:iam::{{
-        aws_account }}:policy/{{ item }}
+        aws_account }}:policy/{{ _aws_iam_policy_name }}
 
 
 - name: set configured IAM managed policy document fact

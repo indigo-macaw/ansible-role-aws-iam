@@ -17,7 +17,7 @@
 - name: set configured managed policies fact for {{ _aws_iam_e }}
   set_fact:
     _aws_iam_configured_managed_policies: >
-      {{ _aws_iam_configured_entities[entity_name]["managed_policies"]
+      {{ _aws_iam_configured_entities[_aws_iam_entity_name]["managed_policies"]
          | default([]) | sort }}
 
 - name: set added managed policies fact for {{ _aws_iam_e }}
