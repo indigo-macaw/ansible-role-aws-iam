@@ -1,18 +1,26 @@
 ---
 
+- name: set IAM managed policy path fact
+  set_fact:
+    _aws_iam_policy_path: >-
+      {{ _aws_iam_existing_policies[_aws_iam_policy_name]["Path"] }}
+
+- name: set IAM managed policy ARN fact
+  set_fact:
+    _aws_iam_policy_arn: >-
+      arn:aws:iam::{{ aws_account }}:policy{{
+        _aws_iam_policy_path }}{{ _aws_iam_policy_name }}
+
 - name: set IAM managed policy facts
   set_fact:
     _aws_iam_p: 'IAM managed policy {{ _aws_iam_policy_name }}'
     _aws_iam_purl: >-
-      https://console.aws.amazon.com/iam/home#policies/arn:aws:iam::{{
-        aws_account }}:policy/{{ _aws_iam_policy_name }}
-
+      https://console.aws.amazon.com/iam/home#policies/{{ _aws_iam_policy_arn }}
 
 - name: get IAM managed policy attached entities
   command: >
     aws iam list-entities-for-policy
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --profile '{{ aws_profile }}'
   register: _aws_iam_policy_attached_entities
   changed_when: False
@@ -26,8 +34,7 @@
   command: >
     aws iam detach-group-policy
             --group-name '{{ item }}'
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --profile '{{ aws_profile }}'
   with_items: >
     {{ _aws_iam_policy_attached_entities["PolicyGroups"]
@@ -37,8 +44,7 @@
   command: >
     aws iam detach-user-policy
             --user-name '{{ item }}'
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --profile '{{ aws_profile }}'
   with_items: >
     {{ _aws_iam_policy_attached_entities["PolicyUsers"]
@@ -48,8 +54,7 @@
   command: >
     aws iam detach-role-policy
             --role-name '{{ item }}'
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --profile '{{ aws_profile }}'
   with_items: >
     {{ _aws_iam_policy_attached_entities["PolicyRoles"]
@@ -59,8 +64,7 @@
 - name: get all non-default IAM managed policy versions
   command: >
     aws iam list-policy-versions
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --query 'Versions[?IsDefaultVersion == `false`].VersionId'
             --profile '{{ aws_profile }}'
   register: _aws_iam_existing_policy_nondefault_versions
@@ -74,8 +78,7 @@
 - name: delete all non-default IAM managed policy versions
   command: >
     aws iam delete-policy-version
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --version-id '{{ item }}'
             --profile '{{ aws_profile }}'
   with_items: '{{ _aws_iam_existing_policy_nondefault_versions }}'
@@ -84,8 +87,7 @@
 - name: remove {{ _aws_iam_p }}
   command: >
     aws iam delete-policy
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --profile '{{ aws_profile }}'
 
 - name: call optional notifier

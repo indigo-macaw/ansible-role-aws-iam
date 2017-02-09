@@ -1,24 +1,35 @@
 ---
 
+- name: set IAM managed policy path fact
+  set_fact:
+    _aws_iam_policy_path: >-
+      {{ _aws_iam_configured_policies[_aws_iam_policy_name]["path"]
+         | default("/") }}
+
+- name: set IAM managed policy ARN fact
+  set_fact:
+    _aws_iam_policy_arn: >-
+      arn:aws:iam::{{ aws_account }}:policy{{
+        _aws_iam_policy_path }}{{ _aws_iam_policy_name }}
+
 - name: set IAM managed policy facts
   set_fact:
     _aws_iam_p: 'IAM managed policy {{ _aws_iam_policy_name }}'
     _aws_iam_purl: >-
-      https://console.aws.amazon.com/iam/home#policies/arn:aws:iam::{{
-        aws_account }}:policy/{{ _aws_iam_policy_name }}
+      https://console.aws.amazon.com/iam/home#policies/{{ _aws_iam_policy_arn }}
 
 
 - name: set configured IAM managed policy document fact
   set_fact:
     _aws_iam_configured_policy_document: >
-      {{ _aws_iam_configured_policies[_aws_iam_policy_name] | default({}) }}
+      {{ _aws_iam_configured_policies[_aws_iam_policy_name]["document"]
+         | default({}) }}
 
 
 - name: get existing IAM managed policy default version
   command: >
     aws iam list-policy-versions
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --query 'Versions[?IsDefaultVersion == `true`].VersionId'
             --output text
             --profile '{{ aws_profile }}'
@@ -34,8 +45,7 @@
 - name: get existing IAM managed policy document
   command: >
     aws iam get-policy-version
-            --policy-arn
-              'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+            --policy-arn '{{ _aws_iam_policy_arn }}'
             --query 'PolicyVersion.Document'
             --version-id '{{ _aws_iam_existing_policy_default_version }}'
             --profile '{{ aws_profile }}'
@@ -53,8 +63,7 @@
     - name: count existing IAM managed policy versions
       command: >
         aws iam list-policy-versions
-                --policy-arn
-                  'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                --policy-arn '{{ _aws_iam_policy_arn }}'
                 --query 'Versions | length(@)'
                 --output text
                 --profile '{{ aws_profile }}'
@@ -71,8 +80,7 @@
         - name: get oldest non-default IAM managed policy version
           command: >
             aws iam list-policy-versions
-                    --policy-arn
-                      'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                    --policy-arn '{{ _aws_iam_policy_arn }}'
                     --query 'Versions[*] | sort_by(@, &CreateDate)[0].VersionId'
                     --output text
                     --profile '{{ aws_profile }}'
@@ -87,8 +95,7 @@
         - name: delete oldest non-default IAM managed policy version
           command: >
             aws iam delete-policy-version
-                    --policy-arn
-                      'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                    --policy-arn '{{ _aws_iam_policy_arn }}'
                     --version-id
                       '{{ _aws_iam_existing_policy_oldest_version }}'
                     --profile '{{ aws_profile }}'
@@ -98,8 +105,7 @@
     - name: update IAM managed policy
       command: >
         aws iam create-policy-version
-                --policy-arn
-                  'arn:aws:iam::{{ aws_account }}:policy/{{ _aws_iam_policy_name }}'
+                --policy-arn '{{ _aws_iam_policy_arn }}'
                 --policy-document
                   '{{ _aws_iam_configured_policy_document | to_nice_json }}'
                 --set-as-default

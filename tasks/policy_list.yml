@@ -8,13 +8,19 @@
 - name: list existing IAM managed policies
   command: >
     aws iam list-policies
-            --query 'Policies[*].PolicyName'
+            --query 'Policies[*]'
             --scope Local
             --profile '{{ aws_profile }}'
-  register: _aws_iam_existing_policies
+  register: _aws_iam_existing_policies_command
   changed_when: False
+
+- name: initialize existing IAM managed policies fact
+  set_fact:
+    _aws_iam_existing_policies: {}
 
 - name: set existing IAM managed policies fact
   set_fact:
     _aws_iam_existing_policies: >
-      {{ _aws_iam_existing_policies.stdout | from_json }}
+      {{ _aws_iam_existing_policies
+         | combine({item.PolicyName: item}) }}
+  with_items: '{{ _aws_iam_existing_policies_command.stdout | from_json }}'
