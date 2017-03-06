@@ -4,6 +4,31 @@
   set_fact:
     _aws_iam_url: 'https://console.aws.amazon.com/iam/home#home'
 
+- name: set target entity facts
+  set_fact:
+    _aws_iam_groups: >
+      {{ aws_iam_group.split(",")       if aws_iam_group is defined else [] }}
+    _aws_iam_policies: >
+      {{ aws_iam_policy.split(",")     if aws_iam_policy is defined else [] }}
+    _aws_iam_roles: >
+      {{ aws_iam_role.split(",")         if aws_iam_role is defined else [] }}
+    _aws_iam_saml_providers: >
+      {{ aws_iam_saml_provider.split(",")
+                                if aws_iam_saml_provider is defined else [] }}
+    _aws_iam_users: >
+      {{ aws_iam_user.split(",")         if aws_iam_user is defined else [] }}
+
+- name: set target entity types fact
+  set_fact:
+    _aws_iam_entities: >
+      {{
+      (aws_iam_entity.split(",") if aws_iam_entity is defined         else []) |
+      union(['group']         if _aws_iam_groups         | length > 0 else []) |
+      union(['policy']        if _aws_iam_policies       | length > 0 else []) |
+      union(['role']          if _aws_iam_roles          | length > 0 else []) |
+      union(['saml_provider'] if _aws_iam_saml_providers | length > 0 else []) |
+      union(['user']          if _aws_iam_users          | length > 0 else [])
+      }}
 
 - name: call optional notifier
   include: 'roles/{{ notifier_role }}/tasks/main.yml'
@@ -11,116 +36,186 @@
     message: >
       started running role <b>aws-iam</b>
       on <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+      {%- if _aws_iam_entities != []
+      -%}; for {% for e in _aws_iam_entities -%}
+      <a href="https://console.aws.amazon.com/iam/home?region={{
+        aws_region
+      }}#/{{ e
+             | replace("policy", "policie")
+             | replace("saml_provider", "provider") }}s">{{ e }}</a>{%
+      if not loop.last -%}, {% endif -%}{% endfor -%}{% endif -%}
+      {%- if _aws_iam_groups != []
+      -%}; group {% for g in _aws_iam_groups -%}
+      <a href="https://console.aws.amazon.com/iam/home?region={{
+        aws_region
+      }}#/groups/{{ g }}">{{ g }}</a>{%
+      if not loop.last -%}, {% endif -%}{% endfor -%}{% endif -%}
+      {%- if _aws_iam_policies != []
+      -%}; policy {% for p in _aws_iam_policies -%}
+      <a href="https://console.aws.amazon.com/iam/home?region={{
+        aws_region
+      }}#/policies/arn:aws:iam::{{ aws_account }}:policy/{{ p }}">{{ p }}</a>{%
+      if not loop.last -%}, {% endif -%}{% endfor -%}{% endif -%}
+      {%- if _aws_iam_roles != []
+      -%}; role {% for r in _aws_iam_roles -%}
+      <a href="https://console.aws.amazon.com/iam/home?region={{
+        aws_region
+      }}#/roles/{{ r }}">{{ r }}</a>{%
+      if not loop.last -%}, {% endif -%}{% endfor -%}{% endif -%}
+      {%- if _aws_iam_saml_providers != []
+      -%}; SAML provider {%
+        for sp in _aws_iam_saml_providers -%}
+      <a href="https://console.aws.amazon.com/iam/home?region={{
+        aws_region
+      }}#/providers/arn:aws:iam::{{ aws_account }}:saml-provider/{{ sp }}">{{
+        sp }}</a>{%
+      if not loop.last -%}, {% endif -%}{% endfor -%}{% endif -%}
+      {%- if _aws_iam_users != []
+      -%}; user {% for u in _aws_iam_users -%}
+      <a href="https://console.aws.amazon.com/iam/home?region={{
+        aws_region
+      }}#/users/{{ u }}">{{ u }}</a>{%
+      if not loop.last -%}, {% endif -%}{% endfor -%}{% endif -%}
   when: notifier_role is defined
 
 
-- include: saml_provider_list.yml
+- block:
 
-- include: saml_provider_create.yml
-  with_items: '{{ _aws_iam_configured_saml_providers }}'
-  when: _aws_iam_saml_provider_arn not in _aws_iam_existing_saml_providers
-  loop_control:
-    loop_var: _aws_iam_saml_provider_arn
+    - include: saml_provider_list.yml
 
-- include: saml_provider_delete.yml
-  with_items: '{{ _aws_iam_existing_saml_providers }}'
-  when: _aws_iam_saml_provider_arn not in _aws_iam_configured_saml_providers
-  loop_control:
-    loop_var: _aws_iam_saml_provider_arn
+    - include: saml_provider_create.yml
+      with_items: '{{ _aws_iam_configured_saml_providers }}'
+      when: _aws_iam_saml_provider_arn not in _aws_iam_existing_saml_providers
+      loop_control:
+        loop_var: _aws_iam_saml_provider_arn
 
-- include: saml_provider_sync.yml
-  with_items: '{{ _aws_iam_configured_saml_providers }}'
-  loop_control:
-    loop_var: _aws_iam_saml_provider_arn
+    - include: saml_provider_delete.yml
+      with_items: '{{ _aws_iam_existing_saml_providers }}'
+      when: _aws_iam_saml_provider_arn not in _aws_iam_configured_saml_providers
+      loop_control:
+        loop_var: _aws_iam_saml_provider_arn
 
+    - include: saml_provider_sync.yml
+      with_items: '{{ _aws_iam_configured_saml_providers }}'
+      loop_control:
+        loop_var: _aws_iam_saml_provider_arn
 
-- include: policy_list.yml
-
-- include: policy_create.yml
-  with_items: '{{ _aws_iam_configured_policies }}'
-  when: _aws_iam_policy_name not in _aws_iam_existing_policies
-  loop_control:
-    loop_var: _aws_iam_policy_name
-
-- include: policy_delete.yml
-  with_items: '{{ _aws_iam_existing_policies }}'
-  when: _aws_iam_policy_name not in _aws_iam_configured_policies
-  loop_control:
-    loop_var: _aws_iam_policy_name
-
-- include: policy_sync.yml
-  with_items: '{{ _aws_iam_configured_policies }}'
-  loop_control:
-    loop_var: _aws_iam_policy_name
+  when: >
+    _aws_iam_entities == [] or
+    'saml_provider' in _aws_iam_entities
 
 
-- name: set entity type fact to "group"
-  set_fact:
-    _aws_iam_entity_type: group
+- block:
 
-- include: entities_list.yml
+    - include: policy_list.yml
 
-- include: entity_create.yml
-  with_items: '{{ _aws_iam_configured_entities }}'
-  loop_control:
-    loop_var: _aws_iam_entity_name
+    - include: policy_create.yml
+      with_items: '{{ _aws_iam_configured_policies }}'
+      when: _aws_iam_policy_name not in _aws_iam_existing_policies
+      loop_control:
+        loop_var: _aws_iam_policy_name
 
-- include: entity_delete.yml
-  with_items: '{{ _aws_iam_existing_entities }}'
-  when: _aws_iam_entity_name not in _aws_iam_configured_entities
-  loop_control:
-    loop_var: _aws_iam_entity_name
+    - include: policy_delete.yml
+      with_items: '{{ _aws_iam_existing_policies }}'
+      when: _aws_iam_policy_name not in _aws_iam_configured_policies
+      loop_control:
+        loop_var: _aws_iam_policy_name
 
-- include: entity_sync.yml
-  with_items: '{{ _aws_iam_configured_entities }}'
-  loop_control:
-    loop_var: _aws_iam_entity_name
+    - include: policy_sync.yml
+      with_items: '{{ _aws_iam_configured_policies }}'
+      loop_control:
+        loop_var: _aws_iam_policy_name
 
-
-- name: set entity type fact to "user"
-  set_fact:
-    _aws_iam_entity_type: user
-
-- include: entities_list.yml
-
-- include: entity_create.yml
-  with_items: '{{ _aws_iam_configured_entities }}'
-  loop_control:
-    loop_var: _aws_iam_entity_name
-
-- include: entity_delete.yml
-  with_items: '{{ _aws_iam_existing_entities }}'
-  when: _aws_iam_entity_name not in _aws_iam_configured_entities
-  loop_control:
-    loop_var: _aws_iam_entity_name
-
-- include: entity_sync.yml
-  with_items: '{{ _aws_iam_configured_entities }}'
-  loop_control:
-    loop_var: _aws_iam_entity_name
+  when: >
+    _aws_iam_entities == [] or
+    'policy' in _aws_iam_entities
 
 
-- name: set entity type fact to "role"
-  set_fact:
-    _aws_iam_entity_type: role
+- block:
 
-- include: entities_list.yml
+    - name: set entity type fact to "group"
+      set_fact:
+        _aws_iam_entity_type: group
 
-- include: entity_create.yml
-  with_items: '{{ _aws_iam_configured_entities }}'
-  loop_control:
-    loop_var: _aws_iam_entity_name
+    - include: entities_list.yml
 
-- include: entity_delete.yml
-  with_items: '{{ _aws_iam_existing_entities }}'
-  when: _aws_iam_entity_name not in _aws_iam_configured_entities
-  loop_control:
-    loop_var: _aws_iam_entity_name
+    - include: entity_create.yml
+      with_items: '{{ _aws_iam_configured_entities }}'
+      loop_control:
+        loop_var: _aws_iam_entity_name
 
-- include: entity_sync.yml
-  with_items: '{{ _aws_iam_configured_entities }}'
-  loop_control:
-    loop_var: _aws_iam_entity_name
+    - include: entity_delete.yml
+      with_items: '{{ _aws_iam_existing_entities }}'
+      when: _aws_iam_entity_name not in _aws_iam_configured_entities
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+    - include: entity_sync.yml
+      with_items: '{{ _aws_iam_configured_entities }}'
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+  when: >
+    _aws_iam_entities == [] or
+    'group' in _aws_iam_entities
+
+
+- block:
+
+    - name: set entity type fact to "user"
+      set_fact:
+        _aws_iam_entity_type: user
+
+    - include: entities_list.yml
+
+    - include: entity_create.yml
+      with_items: '{{ _aws_iam_configured_entities }}'
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+    - include: entity_delete.yml
+      with_items: '{{ _aws_iam_existing_entities }}'
+      when: _aws_iam_entity_name not in _aws_iam_configured_entities
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+    - include: entity_sync.yml
+      with_items: '{{ _aws_iam_configured_entities }}'
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+  when: >
+    _aws_iam_entities == [] or
+    'user' in _aws_iam_entities
+
+
+- block:
+
+    - name: set entity type fact to "role"
+      set_fact:
+        _aws_iam_entity_type: role
+
+    - include: entities_list.yml
+
+    - include: entity_create.yml
+      with_items: '{{ _aws_iam_configured_entities }}'
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+    - include: entity_delete.yml
+      with_items: '{{ _aws_iam_existing_entities }}'
+      when: _aws_iam_entity_name not in _aws_iam_configured_entities
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+    - include: entity_sync.yml
+      with_items: '{{ _aws_iam_configured_entities }}'
+      loop_control:
+        loop_var: _aws_iam_entity_name
+
+  when: >
+    _aws_iam_entities == [] or
+    'role' in _aws_iam_entities
 
 
 - name: call optional notifier

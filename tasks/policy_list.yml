@@ -23,4 +23,6 @@
     _aws_iam_existing_policies: >
       {{ _aws_iam_existing_policies
          | combine({item.PolicyName: item}) }}
-  with_items: '{{ _aws_iam_existing_policies_command.stdout | from_json }}'
+  with_items: >
+    {{ _aws_iam_existing_policies_command.stdout
+       if _aws_iam_existing_policies_command is defined else [] }}
