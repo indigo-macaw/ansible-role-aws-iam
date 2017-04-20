@@ -26,71 +26,36 @@
          | default({}) }}
 
 
-- name: get existing IAM managed policy default version
-  command: >
-    aws iam list-policy-versions
-            --policy-arn '{{ _aws_iam_policy_arn }}'
-            --query 'Versions[?IsDefaultVersion == `true`].VersionId'
-            --output text
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_existing_policy_default_version
-  changed_when: False
-
-- name: set existing IAM managed policy default version fact
-  set_fact:
-    _aws_iam_existing_policy_default_version: >-
-      {{ _aws_iam_existing_policy_default_version.stdout }}
-
-
-- name: get existing IAM managed policy document
-  command: >
-    aws iam get-policy-version
-            --policy-arn '{{ _aws_iam_policy_arn }}'
-            --query 'PolicyVersion.Document'
-            --version-id '{{ _aws_iam_existing_policy_default_version }}'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_existing_policy_document
-  changed_when: False
-
 - name: set existing IAM managed policy document fact
   set_fact:
     _aws_iam_existing_policy_document: >
-      {{ _aws_iam_existing_policy_document.stdout | from_json }}
+      {{ _aws_iam_aad
+         | json_query("Policies"
+                      + "[?Arn == `" + _aws_iam_policy_arn + "`]"
+                      + ".PolicyVersionList[?IsDefaultVersion == true]"
+                      + "| [0][0].Document") }}
 
 
 - block:
 
-    - name: count existing IAM managed policy versions
-      command: >
-        aws iam list-policy-versions
-                --policy-arn '{{ _aws_iam_policy_arn }}'
-                --query 'Versions | length(@)'
-                --output text
-                --profile '{{ aws_profile }}'
-      register: _aws_iam_existing_policy_version_count
-      changed_when: False
-
     - name: set existing IAM managed policy versions count fact
       set_fact:
         _aws_iam_existing_policy_version_count: >-
-          {{ _aws_iam_existing_policy_version_count.stdout }}
+          {{ _aws_iam_aad
+             | json_query("Policies"
+                          + "[?Arn == `" + _aws_iam_policy_arn + "`]"
+                          + ".PolicyVersionList | length([0])") }}
 
     - block:
-
-        - name: get oldest non-default IAM managed policy version
-          command: >
-            aws iam list-policy-versions
-                    --policy-arn '{{ _aws_iam_policy_arn }}'
-                    --query 'Versions[*] | sort_by(@, &CreateDate)[0].VersionId'
-                    --output text
-                    --profile '{{ aws_profile }}'
-          register: _aws_iam_existing_policy_oldest_version
-          changed_when: False
 
         - name: set oldest non-default IAM managed policy version fact
           set_fact:
             _aws_iam_existing_policy_oldest_version: >-
-              {{ _aws_iam_existing_policy_oldest_version.stdout }}
+              {{ _aws_iam_aad
+                 | json_query("Policies"
+                              + "[?Arn == `" + _aws_iam_policy_arn + "`]"
+                              + ".PolicyVersionList"
+                              + "| sort_by([0], &CreateDate)[0].VersionId") }}
 
         - name: delete oldest non-default IAM managed policy version
           command: >

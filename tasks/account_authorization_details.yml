@@ -1,0 +1,12 @@
+---
+
+- name: get existing account IAM configuration
+  command: >
+    aws iam get-account-authorization-details
+            --profile {{ aws_profile }}
+  register: _aws_iam_aad
+  changed_when: False
+
+- name: set existing account IAM configuration fact
+  set_fact:
+    _aws_iam_aad: '{{ _aws_iam_aad.stdout | from_json }}'

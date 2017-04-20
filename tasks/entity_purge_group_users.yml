@@ -1,17 +1,12 @@
 ---
 
-- name: list members of {{ _aws_iam_e }}
-  command: >
-    aws iam get-{{ _aws_iam_entity_type }}
-            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
-            --query 'Users[*].UserName'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_members
-  changed_when: False
-
 - name: set members fact for {{ _aws_iam_e }}
   set_fact:
-    _aws_iam_members: '{{ _aws_iam_members.stdout | from_json }}'
+    _aws_iam_members: >
+      {{ _aws_iam_aad
+         | json_query("UserDetailList[?contains(GroupList, `"
+                      + _aws_iam_entity_name
+                      + "`)].UserName") }}
 
 - name: remove all members for {{ _aws_iam_e }}
   command: >

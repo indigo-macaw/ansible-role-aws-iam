@@ -19,39 +19,36 @@
          | default({}) }}
 
 
-- name: list inline policies embedded in {{ _aws_iam_e }}
-  command: >
-    aws iam list-{{ _aws_iam_entity_type }}-policies
-            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
-            --query 'PolicyNames'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_embedded_inline_policies
-  changed_when: False
-
 - name: set embedded inline policies fact for {{ _aws_iam_e }}
   set_fact:
     _aws_iam_embedded_inline_policies: >
-      {{ _aws_iam_embedded_inline_policies.stdout | from_json | sort }}
-
-- name: get embedded inline policy documents for {{ _aws_iam_e }}
-  command: >
-    aws iam get-{{ _aws_iam_entity_type }}-policy
-            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
-            --policy-name '{{ item }}'
-            --profile '{{ aws_profile }}'
-  with_items: '{{ _aws_iam_embedded_inline_policies }}'
-  register: _aws_iam_get_policy
-  changed_when: False
+      {{ _aws_iam_aad
+         | json_query(_aws_iam_Entity_Type
+                      + "DetailList[?"
+                      + _aws_iam_Entity_Type
+                      + "Name == `"
+                      + _aws_iam_entity_name
+                      + "`]."
+                      + _aws_iam_Entity_Type
+                      + "PolicyList[].PolicyName") }}
 
 - name: set embedded inline policy documents fact for {{ _aws_iam_e }}
   set_fact:
     _aws_iam_embedded_inline_policy_documents: >
       {{ _aws_iam_embedded_inline_policy_documents
          | default({})
-         | combine({item.0: (item.1.stdout | from_json).PolicyDocument}) }}
-  with_together:
-    - '{{ _aws_iam_embedded_inline_policies }}'
-    - '{{ _aws_iam_get_policy.results }}'
+         | combine({item: (_aws_iam_aad
+                           | json_query(_aws_iam_Entity_Type
+                                        + "DetailList[?"
+                                        + _aws_iam_Entity_Type
+                                        + "Name == `"
+                                        + _aws_iam_entity_name
+                                        + "`]."
+                                        + _aws_iam_Entity_Type
+                                        + "PolicyList[] | [?PolicyName == `"
+                                        + item
+                                        + "`] | [0].PolicyDocument"))}) }}
+  with_items: '{{ _aws_iam_embedded_inline_policies }}'
 
 
 - name: set added inline policies fact for {{ _aws_iam_e }}

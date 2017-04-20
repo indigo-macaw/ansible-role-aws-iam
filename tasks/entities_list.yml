@@ -6,16 +6,11 @@
       {{ vars["aws_iam_" + _aws_iam_entity_type + "s"] | default([]) }}
     _aws_iam_Entity_Type: '{{ _aws_iam_entity_type | capitalize }}'
 
-- name: list existing IAM {{ _aws_iam_entity_type }}s
-  command: >
-    aws iam list-{{ _aws_iam_entity_type }}s
-            --query
-              '{{ _aws_iam_Entity_Type }}s[*].{{ _aws_iam_Entity_Type }}Name'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_existing_entities
-  changed_when: False
-
 - name: set fact for existing IAM {{ _aws_iam_entity_type }}s
   set_fact:
     _aws_iam_existing_entities: >
-      {{ _aws_iam_existing_entities.stdout | from_json }}
+      {{ _aws_iam_aad
+         | json_query(_aws_iam_Entity_Type
+                      + "DetailList[*]."
+                      + _aws_iam_Entity_Type
+                      + "Name") }}

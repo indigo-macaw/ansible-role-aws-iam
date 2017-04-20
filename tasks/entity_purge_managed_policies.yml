@@ -1,18 +1,15 @@
 ---
 
-- name: list managed policies attached to {{ _aws_iam_e }}
-  command: >
-    aws iam list-attached-{{ _aws_iam_entity_type }}-policies
-            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
-            --query 'AttachedPolicies[*].PolicyArn'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_attached_managed_policies
-  changed_when: False
-
 - name: set attached managed policies fact for {{ _aws_iam_e }}
   set_fact:
-    _aws_iam_attached_managed_policies:
-      '{{ _aws_iam_attached_managed_policies.stdout | from_json }}'
+    _aws_iam_attached_managed_policies: >
+      {{ _aws_iam_aad
+         | json_query(_aws_iam_Entity_Type
+                      + "DetailList[?"
+                      + _aws_iam_Entity_Type
+                      + "Name == `"
+                      + _aws_iam_entity_name
+                      + "`].AttachedManagedPolicies[].PolicyArn") }}
 
 - name: remove all managed policies for {{ _aws_iam_e }}
   command: >

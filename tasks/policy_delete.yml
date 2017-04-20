@@ -17,18 +17,24 @@
     _aws_iam_purl: >-
       https://console.aws.amazon.com/iam/home#policies/{{ _aws_iam_policy_arn }}
 
-- name: get IAM managed policy attached entities
-  command: >
-    aws iam list-entities-for-policy
-            --policy-arn '{{ _aws_iam_policy_arn }}'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_policy_attached_entities
-  changed_when: False
-
 - name: set IAM managed policy attached entities fact
   set_fact:
     _aws_iam_policy_attached_entities: >
-      {{ _aws_iam_policy_attached_entities.stdout | from_json }}
+      {{ _aws_iam_aad
+         | json_query("{
+                          PolicyGroups:
+                            GroupDetailList[?AttachedManagedPolicies
+                            [?PolicyArn == `" + _aws_iam_policy_arn + "`]]
+                            .{GroupName: GroupName, GroupId: GroupId},
+                          PolicyUsers:
+                            UserDetailList[?AttachedManagedPolicies
+                            [?PolicyArn == `" + _aws_iam_policy_arn + "`]]
+                            .{UserName: UserName, UserId: UserId},
+                          PolicyRoles:
+                            RoleDetailList[?AttachedManagedPolicies
+                            [?PolicyArn == `" + _aws_iam_policy_arn + "`]]
+                            .{RoleName: RoleName, RoleId: RoleId}
+                       }") }}
 
 - name: detach groups from IAM managed policy
   command: >
@@ -61,19 +67,14 @@
        | map(attribute="RoleName") | list }}
 
 
-- name: get all non-default IAM managed policy versions
-  command: >
-    aws iam list-policy-versions
-            --policy-arn '{{ _aws_iam_policy_arn }}'
-            --query 'Versions[?IsDefaultVersion == `false`].VersionId'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_existing_policy_nondefault_versions
-  changed_when: False
-
 - name: set all non-default IAM managed policy versions fact
   set_fact:
     _aws_iam_existing_policy_nondefault_versions: >
-      {{ _aws_iam_existing_policy_nondefault_versions.stdout | from_json }}
+      {{ _aws_iam_aad
+         | json_query("Policies"
+                      + "[?Arn == `" + _aws_iam_policy_arn + "`]"
+                      + ".PolicyVersionList"
+                      + "[?IsDefaultVersion == `false`].VersionId") }}
 
 - name: delete all non-default IAM managed policy versions
   command: >

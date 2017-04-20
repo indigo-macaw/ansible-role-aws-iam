@@ -1,18 +1,12 @@
 ---
 
-- name: list instance profiles using {{ _aws_iam_e }}
-  command: >
-    aws iam list-instance-profiles-for-{{ _aws_iam_entity_type }}
-            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
-            --query 'InstanceProfiles[*].InstanceProfileName'
-            --profile '{{ aws_profile }}'
-  register: _aws_iam_instance_profiles
-  changed_when: False
-
 - name: set instance profiles fact for {{ _aws_iam_e }}
   set_fact:
     _aws_iam_instance_profiles: >
-      {{ _aws_iam_instance_profiles.stdout | from_json }}
+      {{ _aws_iam_aad
+         | json_query("RoleDetailList[?RoleName == `"
+                      + _aws_iam_entity_name
+                      + "`].InstanceProfileList[*].InstanceProfileName[]") }}
 
 - name: remove {{ _aws_iam_e }} from instance profiles
   command: >

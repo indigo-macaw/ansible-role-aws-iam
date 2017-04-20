@@ -14,6 +14,9 @@
   when: notifier_role is defined
 
 
+- include: account_authorization_details.yml
+
+
 - include: saml_provider_list.yml
 
 - include: saml_provider_create.yml
