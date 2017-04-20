@@ -48,12 +48,6 @@
   loop_control:
     loop_var: _aws_iam_policy_name
 
-- include: policy_delete.yml
-  with_items: '{{ _aws_iam_existing_policies }}'
-  when: _aws_iam_policy_name not in _aws_iam_configured_policies
-  loop_control:
-    loop_var: _aws_iam_policy_name
-
 - include: policy_sync.yml
   with_items: '{{ _aws_iam_configured_policies }}'
   when: >
@@ -133,6 +127,13 @@
   with_items: '{{ _aws_iam_configured_entities }}'
   loop_control:
     loop_var: _aws_iam_entity_name
+
+
+- include: policy_delete.yml
+  with_items: '{{ _aws_iam_existing_policies }}'
+  when: _aws_iam_policy_name not in _aws_iam_configured_policies
+  loop_control:
+    loop_var: _aws_iam_policy_name
 
 
 - name: call optional notifier
