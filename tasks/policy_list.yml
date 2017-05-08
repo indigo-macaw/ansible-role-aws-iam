@@ -15,6 +15,6 @@
       {{ _aws_iam_existing_policies
          | combine({item.PolicyName: item}) }}
   with_items: >
-    {{ _aws_iam_aad
-       | json_query("Policies
-                     [?!starts_with(Arn, `arn:aws:iam::aws:policy/`)]") }}
+    {{ _aws_iam_aad.Policies
+       | rejectattr("Arn", "match", "^arn:aws:iam::aws:policy/")
+       | list }}
