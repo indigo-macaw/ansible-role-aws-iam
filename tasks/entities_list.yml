@@ -11,6 +11,7 @@
     _aws_iam_existing_entities: >
       {{ _aws_iam_aad
          | json_query(_aws_iam_Entity_Type
-                      + "DetailList[*]."
+                      + "DetailList"
+                      + "[? ! starts_with(Path, `/aws-service-role/`)]."
                       + _aws_iam_Entity_Type
                       + "Name") }}
