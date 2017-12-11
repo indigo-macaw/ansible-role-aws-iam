@@ -52,6 +52,8 @@
           set_fact:
             _aws_iam_existing_policy_oldest_version: >-
               {{ _aws_iam_aad
+                 | to_json
+                 | from_json
                  | json_query("Policies"
                               + "[?Arn == `" + _aws_iam_policy_arn + "`]"
                               + ".PolicyVersionList"

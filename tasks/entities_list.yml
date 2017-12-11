@@ -10,6 +10,8 @@
   set_fact:
     _aws_iam_existing_entities: >
       {{ _aws_iam_aad
+         | to_json
+         | from_json
          | json_query(_aws_iam_Entity_Type
                       + "DetailList"
                       + "[? ! starts_with(Path, `/aws-service-role/`)]."
