@@ -14,12 +14,16 @@
 
 - name: create {{ _aws_iam_e }}
   iam:
+    profile:        '{{ aws_profile }}'
+    aws_access_key: '{{ aws_iam_assume_role_access_key    | default(omit) }}'
+    aws_secret_key: '{{ aws_iam_assume_role_secret_key    | default(omit) }}'
+    security_token: '{{ aws_iam_assume_role_session_token | default(omit) }}'
+
     iam_type: '{{ _aws_iam_entity_type }}'
     name: '{{ _aws_iam_entity_name }}'
     path: >-
       {{ _aws_iam_configured_entities[_aws_iam_entity_name]["path"]
          | default("/") }}
-    profile: '{{ aws_profile }}'
     state: present
   register: _aws_iam_create
 
