@@ -6,7 +6,7 @@
 
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       started running role <b>aws-iam</b>
@@ -14,24 +14,24 @@
   when: notifier_role is defined
 
 
-- include: account_authorization_details.yml
+- include_tasks: account_authorization_details.yml
 
 
-- include: saml_provider_list.yml
+- include_tasks: saml_provider_list.yml
 
-- include: saml_provider_create.yml
+- include_tasks: saml_provider_create.yml
   with_items: '{{ _aws_iam_configured_saml_providers }}'
   when: _aws_iam_saml_provider_arn not in _aws_iam_existing_saml_providers
   loop_control:
     loop_var: _aws_iam_saml_provider_arn
 
-- include: saml_provider_delete.yml
+- include_tasks: saml_provider_delete.yml
   with_items: '{{ _aws_iam_existing_saml_providers }}'
   when: _aws_iam_saml_provider_arn not in _aws_iam_configured_saml_providers
   loop_control:
     loop_var: _aws_iam_saml_provider_arn
 
-- include: saml_provider_sync.yml
+- include_tasks: saml_provider_sync.yml
   with_items: '{{ _aws_iam_configured_saml_providers }}'
   when: >
     _aws_iam_saml_provider_arn in _aws_iam_configured_saml_providers and
@@ -40,15 +40,15 @@
     loop_var: _aws_iam_saml_provider_arn
 
 
-- include: policy_list.yml
+- include_tasks: policy_list.yml
 
-- include: policy_create.yml
+- include_tasks: policy_create.yml
   with_items: '{{ _aws_iam_configured_policies }}'
   when: _aws_iam_policy_name not in _aws_iam_existing_policies
   loop_control:
     loop_var: _aws_iam_policy_name
 
-- include: policy_sync.yml
+- include_tasks: policy_sync.yml
   with_items: '{{ _aws_iam_configured_policies }}'
   when: >
     _aws_iam_policy_name in _aws_iam_configured_policies and
@@ -61,21 +61,21 @@
   set_fact:
     _aws_iam_entity_type: group
 
-- include: entities_list.yml
+- include_tasks: entities_list.yml
 
-- include: entity_create.yml
+- include_tasks: entity_create.yml
   with_items: '{{ _aws_iam_configured_entities }}'
   when: _aws_iam_entity_name not in _aws_iam_existing_entities
   loop_control:
     loop_var: _aws_iam_entity_name
 
-- include: entity_delete.yml
+- include_tasks: entity_delete.yml
   with_items: '{{ _aws_iam_existing_entities }}'
   when: _aws_iam_entity_name not in _aws_iam_configured_entities
   loop_control:
     loop_var: _aws_iam_entity_name
 
-- include: entity_sync.yml
+- include_tasks: entity_sync.yml
   with_items: '{{ _aws_iam_configured_entities }}'
   loop_control:
     loop_var: _aws_iam_entity_name
@@ -85,21 +85,21 @@
   set_fact:
     _aws_iam_entity_type: user
 
-- include: entities_list.yml
+- include_tasks: entities_list.yml
 
-- include: entity_create.yml
+- include_tasks: entity_create.yml
   with_items: '{{ _aws_iam_configured_entities }}'
   when: _aws_iam_entity_name not in _aws_iam_existing_entities
   loop_control:
     loop_var: _aws_iam_entity_name
 
-- include: entity_delete.yml
+- include_tasks: entity_delete.yml
   with_items: '{{ _aws_iam_existing_entities }}'
   when: _aws_iam_entity_name not in _aws_iam_configured_entities
   loop_control:
     loop_var: _aws_iam_entity_name
 
-- include: entity_sync.yml
+- include_tasks: entity_sync.yml
   with_items: '{{ _aws_iam_configured_entities }}'
   loop_control:
     loop_var: _aws_iam_entity_name
@@ -109,27 +109,27 @@
   set_fact:
     _aws_iam_entity_type: role
 
-- include: entities_list.yml
+- include_tasks: entities_list.yml
 
-- include: entity_create.yml
+- include_tasks: entity_create.yml
   with_items: '{{ _aws_iam_configured_entities }}'
   when: _aws_iam_entity_name not in _aws_iam_existing_entities
   loop_control:
     loop_var: _aws_iam_entity_name
 
-- include: entity_delete.yml
+- include_tasks: entity_delete.yml
   with_items: '{{ _aws_iam_existing_entities }}'
   when: _aws_iam_entity_name not in _aws_iam_configured_entities
   loop_control:
     loop_var: _aws_iam_entity_name
 
-- include: entity_sync.yml
+- include_tasks: entity_sync.yml
   with_items: '{{ _aws_iam_configured_entities }}'
   loop_control:
     loop_var: _aws_iam_entity_name
 
 
-- include: policy_delete.yml
+- include_tasks: policy_delete.yml
   with_items: '{{ _aws_iam_existing_policies }}'
   when: _aws_iam_policy_name not in _aws_iam_configured_policies
   loop_control:
@@ -137,7 +137,7 @@
 
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       finished running role <b>aws-iam</b>

@@ -28,7 +28,7 @@
   register: _aws_iam_create
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       created <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a>

@@ -21,7 +21,7 @@
     != _aws_iam_configured_entities[_aws_iam_entity_name]["assume_role_policy"]
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       updated role assumption policy for

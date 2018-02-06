@@ -9,7 +9,7 @@
   with_items: '{{ _aws_iam_removed_managed_policies }}'
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       detached managed

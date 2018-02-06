@@ -33,7 +33,7 @@
   with_items: '{{ _aws_iam_added_groups }}'
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       added <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a> to
@@ -58,7 +58,7 @@
   with_items: '{{ _aws_iam_removed_groups }}'
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       removed <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a> from

@@ -12,17 +12,17 @@
     _aws_iam_configured_entities: >
       {{ vars["aws_iam_" + _aws_iam_entity_type + "s"] }}
 
-- include: entity_sync_managed_policies_facts.yml
-- include: entity_sync_managed_policies_attach.yml
-- include: entity_sync_managed_policies_detach.yml
+- include_tasks: entity_sync_managed_policies_facts.yml
+- include_tasks: entity_sync_managed_policies_attach.yml
+- include_tasks: entity_sync_managed_policies_detach.yml
 
-- include: entity_sync_inline_policies_facts.yml
-- include: entity_sync_inline_policies_add.yml
-- include: entity_sync_inline_policies_delete.yml
-- include: entity_sync_inline_policies_update.yml
+- include_tasks: entity_sync_inline_policies_facts.yml
+- include_tasks: entity_sync_inline_policies_add.yml
+- include_tasks: entity_sync_inline_policies_delete.yml
+- include_tasks: entity_sync_inline_policies_update.yml
 
-- include: entity_sync_user_groups.yml
+- include_tasks: entity_sync_user_groups.yml
   when: _aws_iam_entity_type == 'user'
 
-- include: entity_sync_assume_role_policy.yml
+- include_tasks: entity_sync_assume_role_policy.yml
   when: _aws_iam_entity_type == 'role'

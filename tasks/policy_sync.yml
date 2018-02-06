@@ -82,7 +82,7 @@
         != _aws_iam_configured_policy_document
 
     - name: call optional notifier
-      include: 'roles/{{ notifier_role }}/tasks/main.yml'
+      include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
       vars:
         message: >
           updated <a href="{{ _aws_iam_purl }}">{{ _aws_iam_p }}</a>

@@ -4,16 +4,16 @@
   set_fact:
     _aws_iam_e: 'IAM {{ _aws_iam_entity_type }} {{ _aws_iam_entity_name }}'
 
-- include: entity_purge_managed_policies.yml
-- include: entity_purge_inline_policies.yml
+- include_tasks: entity_purge_managed_policies.yml
+- include_tasks: entity_purge_inline_policies.yml
 
-- include: entity_purge_group_users.yml
+- include_tasks: entity_purge_group_users.yml
   when: _aws_iam_entity_type == 'group'
 
-- include: entity_purge_user_groups.yml
+- include_tasks: entity_purge_user_groups.yml
   when: _aws_iam_entity_type == 'user'
 
-- include: entity_purge_role_instance_profile.yml
+- include_tasks: entity_purge_role_instance_profile.yml
   when: _aws_iam_entity_type == 'role'
 
 - name: remove {{ _aws_iam_e }}
@@ -29,7 +29,7 @@
   register: _aws_iam_remove
 
 - name: call optional notifier
-  include: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
   vars:
     message: >
       deleted <b>{{ _aws_iam_e }}</b>
