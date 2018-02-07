@@ -4,16 +4,16 @@
   set_fact:
     _aws_iam_e: 'IAM {{ _aws_iam_entity_type }} {{ _aws_iam_entity_name }}'
 
-- include_tasks: entity_purge_managed_policies.yml
-- include_tasks: entity_purge_inline_policies.yml
+- import_tasks: entity_purge_managed_policies.yml
+- import_tasks: entity_purge_inline_policies.yml
 
-- include_tasks: entity_purge_group_users.yml
+- import_tasks: entity_purge_group_users.yml
   when: _aws_iam_entity_type == 'group'
 
-- include_tasks: entity_purge_user_groups.yml
+- import_tasks: entity_purge_user_groups.yml
   when: _aws_iam_entity_type == 'user'
 
-- include_tasks: entity_purge_role_instance_profile.yml
+- import_tasks: entity_purge_role_instance_profile.yml
   when: _aws_iam_entity_type == 'role'
 
 - name: remove {{ _aws_iam_e }}
