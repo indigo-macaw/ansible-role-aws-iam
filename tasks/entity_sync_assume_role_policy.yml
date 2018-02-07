@@ -8,14 +8,29 @@
                       + _aws_iam_entity_name
                       + "`].AssumeRolePolicyDocument | [0]") }}
 
-- name: update role assumption policy for {{ _aws_iam_e }}
-  command: >
-    aws iam update-assume-role-policy
-            --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
-            --policy-document
-              '{{ _aws_iam_configured_entities[_aws_iam_entity_name]["assume_role_policy"]
-                  | to_nice_json }}'
-            --profile '{{ aws_profile }}'
+- block:
+
+    - name: update role assumption policy for {{ _aws_iam_e }}
+      command: >
+        aws iam update-assume-role-policy
+                --{{ _aws_iam_entity_type }}-name '{{ _aws_iam_entity_name }}'
+                --policy-document
+                  '{{ _aws_iam_configured_entities
+                        [_aws_iam_entity_name]
+                        ["assume_role_policy"]
+                      | to_nice_json }}'
+                --profile '{{ aws_profile }}'
+
+    - name: call optional notifier
+      include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
+      vars:
+        message: >
+          updated role assumption policy for
+          <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a>
+          in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
+      when: >
+        notifier_role is defined
+
   when: >
     ( _aws_iam_assume_role_policy
       | sort_json_policy_dict )
@@ -25,14 +40,3 @@
         ["assume_role_policy"]
       | sort_json_policy_dict )
 
-- name: call optional notifier
-  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
-  vars:
-    message: >
-      updated role assumption policy for
-      <a href="{{ _aws_iam_eurl }}">{{ _aws_iam_e }}</a>
-      in <a href="{{ _aws_iam_url }}">account {{ aws_profile }}</a>
-  when: >
-    notifier_role is defined and
-    _aws_iam_assume_role_policy
-    != _aws_iam_configured_entities[_aws_iam_entity_name]["assume_role_policy"]
