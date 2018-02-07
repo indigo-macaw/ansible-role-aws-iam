@@ -17,8 +17,13 @@
                   | to_nice_json }}'
             --profile '{{ aws_profile }}'
   when: >
-    _aws_iam_assume_role_policy 
-    != _aws_iam_configured_entities[_aws_iam_entity_name]["assume_role_policy"]
+    ( _aws_iam_assume_role_policy
+      | sort_json_policy_dict )
+    !=
+    ( _aws_iam_configured_entities
+        [_aws_iam_entity_name]
+        ["assume_role_policy"]
+      | sort_json_policy_dict )
 
 - name: call optional notifier
   include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
