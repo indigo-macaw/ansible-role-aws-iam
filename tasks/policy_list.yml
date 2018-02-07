@@ -18,3 +18,5 @@
     {{ _aws_iam_aad.Policies
        | rejectattr("Arn", "match", "^arn:aws:iam::aws:policy/")
        | list }}
+  loop_control:
+    label: '{{ item.PolicyName }}'
