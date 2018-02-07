@@ -7,11 +7,6 @@
       https://console.aws.amazon.com/iam/home#{{
         _aws_iam_entity_type }}s/{{ _aws_iam_entity_name }}
 
-- name: set configuration fact for IAM {{ _aws_iam_entity_type }}s
-  set_fact:
-    _aws_iam_configured_entities: >
-      {{ vars["aws_iam_" + _aws_iam_entity_type + "s"] }}
-
 - import_tasks: entity_sync_managed_policies_facts.yml
 - import_tasks: entity_sync_managed_policies_attach.yml
 - import_tasks: entity_sync_managed_policies_detach.yml
