@@ -2,7 +2,7 @@
 
 - name: set role assumption policy fact for {{ _aws_iam_e }}
   set_fact:
-    _aws_iam_assume_role_policy: >
+    _aws_iam_assume_role_policy: >-
       {{ _aws_iam_aad
          | json_query("RoleDetailList[?RoleName == `"
                       + _aws_iam_entity_name
@@ -32,6 +32,8 @@
         notifier_role is defined
 
   when: >
+    ( _aws_iam_assume_role_policy == '')
+    or
     ( _aws_iam_assume_role_policy
       | sort_json_policy_dict )
     !=
