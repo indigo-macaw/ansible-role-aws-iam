@@ -77,5 +77,10 @@
     {{ _aws_iam_configured_inline_policies
        | intersect(_aws_iam_embedded_inline_policies) }}
   when: >
+    item not in _aws_iam_embedded_inline_policy_documents
+    or
+    (
     _aws_iam_embedded_inline_policy_documents[item]
-    != _aws_iam_configured_inline_policy_documents[item]
+    !=
+    _aws_iam_configured_inline_policy_documents[item]
+    )
