@@ -1,0 +1,34 @@
+---
+
+aws_iam_actions:
+
+  iam_console:
+    - iam:GetAccountPasswordPolicy
+    - iam:GetAccountSummary
+    - iam:ListAccountAliases
+    - iam:ListUsers
+
+  iam_user_self_management:
+    - iam:*AccessKey*
+    - iam:GenerateServiceLastAccessedDetails
+    - iam:GetLoginProfile
+    - iam:ListAttachedUserPolicies
+    - iam:ListGroupsForUser
+    - iam:ListServiceSpecificCredentials
+    - iam:ListSSHPublicKeys
+    - iam:ListUserPolicies
+
+  kms_s3:
+    - kms:Decrypt
+    - kms:DescribeKey
+    - kms:Encrypt
+    - kms:GenerateDataKey*
+    - kms:ReEncrypt*
+
+  kms_s3_read_only:
+    - kms:Decrypt
+    - kms:DescribeKey
+
+  s3_read_only:
+    - s3:Get*
+    - s3:List*
