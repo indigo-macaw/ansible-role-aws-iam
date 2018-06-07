@@ -15,6 +15,7 @@
 
 
 - import_tasks: account_authorization_details.yml
+- import_tasks: account_ids.yml
 
 
 - import_tasks: saml_provider_list.yml

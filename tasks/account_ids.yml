@@ -1,0 +1,11 @@
+---
+
+- name: set AWS account ID dictionary fact
+  set_fact:
+    aws_account_ids: >
+      {{
+        aws_account_ids
+        | default({})
+        | combine({(item | regex_replace('aws-account-', '')): hostvars[item]["aws_account"]})
+      }}
+  with_items: '{{ groups["aws-accounts"] }}'
