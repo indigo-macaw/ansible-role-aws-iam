@@ -12,6 +12,7 @@
             --profile '{{ aws_profile }}'
   register: _aws_iam_existing_saml_providers
   changed_when: False
+  check_mode: false
 
 - name: set existing IAM SAML providers fact
   set_fact:

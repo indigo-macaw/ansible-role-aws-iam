@@ -6,6 +6,7 @@
             --profile {{ aws_profile }}
   register: _aws_iam_aad
   changed_when: False
+  check_mode: false
 
 - name: set existing account IAM configuration fact
   set_fact:

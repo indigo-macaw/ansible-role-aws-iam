@@ -24,6 +24,7 @@
             --profile '{{ aws_profile }}'
   register: _aws_iam_existing_saml_provider_metadata
   changed_when: False
+  check_mode: false
 
 - name: set existing IAM SAML provider metadata fact
   set_fact:
