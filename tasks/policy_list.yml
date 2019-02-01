@@ -3,7 +3,15 @@
 - name: set configured IAM managed policies fact
   set_fact:
     _aws_iam_configured_policies: >
-      {{ vars["aws_iam_policies"] | default([]) }}
+      {{
+          vars["aws_iam_policies_common"] | default({})
+        |
+        combine(
+          vars["aws_iam_policies"]        | default({})
+        )
+        |
+        default({})
+      }}
 
 - name: initialize existing IAM managed policies fact
   set_fact:

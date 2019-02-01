@@ -3,7 +3,15 @@
 - name: set fact for configured IAM {{ _aws_iam_entity_type }}s
   set_fact:
     _aws_iam_configured_entities: >
-      {{ vars["aws_iam_" + _aws_iam_entity_type + "s"] | default([]) }}
+      {{
+          vars["aws_iam_" + _aws_iam_entity_type + "s_common"] | default({})
+        |
+        combine(
+          vars["aws_iam_" + _aws_iam_entity_type + "s"]        | default({})
+        )
+        |
+        default({})
+      }}
     _aws_iam_Entity_Type: '{{ _aws_iam_entity_type | capitalize }}'
 
 - name: set fact for existing IAM {{ _aws_iam_entity_type }}s
