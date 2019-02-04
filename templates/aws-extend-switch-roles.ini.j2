@@ -1,0 +1,21 @@
+[{{ aws_profile }}]
+aws_account_id = {{ aws_profile }}
+{% for account in (groups["aws-accounts"] | sort) %}
+{%
+     if
+       (
+         "aws_iam_roles" in hostvars[account]
+         and
+         user in hostvars[account]["aws_iam_roles"]
+       ) or (
+         "aws_iam_roles_common" in hostvars[account]
+         and
+         user in hostvars[account]["aws_iam_roles_common"]
+       )
+%}
+
+[{{ user }} @ {{ hostvars[account]["aws_profile"] }}]
+role_arn = arn:aws:iam::{{ hostvars[account]["aws_account"] }}:role/{{ user }}
+source_profile = {{ aws_profile }}
+{%   endif %}
+{% endfor %}

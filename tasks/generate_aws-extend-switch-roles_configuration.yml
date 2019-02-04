@@ -1,0 +1,18 @@
+---
+
+- name: require that at least one user be specified
+  assert:
+    fail_msg: You must specify a comma-delimited list of at least one user
+    that: aws_iam_target_user is defined
+
+- name: set target user fact
+  set_fact:
+    _aws_iam_target_users: '{{ aws_iam_target_user.split(",") }}'
+
+- name: generate aws-extend-switch-roles configuration
+  template:
+    dest: '{{ playbook_dir }}/aws-extend-switch-roles--{{ user }}.ini'
+    src: aws-extend-switch-roles.ini.j2
+  loop: '{{ _aws_iam_target_users }}'
+  loop_control:
+    loop_var: user
