@@ -1,0 +1,26 @@
+{% for account in (groups["aws-accounts"] | sort) %}
+{%
+     if
+       (
+         "aws_iam_roles" in hostvars[account]
+         and
+         user in hostvars[account]["aws_iam_roles"]
+       ) or (
+         "aws_iam_roles_common" in hostvars[account]
+         and
+         user in hostvars[account]["aws_iam_roles_common"]
+       )
+%}
+
+[profile {{ hostvars[account]["aws_profile"] }}]
+region = us-east-1
+{%     if account != "aws-account-" + aws_profile %}
+role_arn = arn:aws:iam::{{ hostvars[account]["aws_account"] }}:role/{{ user }}
+{%     endif %}
+s3 =
+    signature_version = s3v4
+{%     if account != "aws-account-" + aws_profile %}
+source_profile = {{ aws_profile }}
+{%     endif %}
+{%   endif %}
+{% endfor %}
