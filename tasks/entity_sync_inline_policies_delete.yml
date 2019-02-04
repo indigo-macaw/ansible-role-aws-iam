@@ -9,7 +9,8 @@
   with_items: '{{ _aws_iam_deleted_inline_policies }}'
 
 - name: call optional notifier
-  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_role:
+    name: '{{ notifier_role }}'
   vars:
     message: >
       deleted inline

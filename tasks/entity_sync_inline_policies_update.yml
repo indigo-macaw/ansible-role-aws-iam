@@ -12,7 +12,8 @@
   with_items: '{{ _aws_iam_updated_inline_policies }}'
 
 - name: call optional notifier
-  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_role:
+    name: '{{ notifier_role }}'
   vars:
     message: >
       modified existing inline

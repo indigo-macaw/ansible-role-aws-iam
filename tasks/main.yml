@@ -6,7 +6,8 @@
 
 
 - name: call optional notifier
-  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_role:
+    name: '{{ notifier_role }}'
   vars:
     message: >
       started running role <b>aws-iam</b>
@@ -138,7 +139,8 @@
 
 
 - name: call optional notifier
-  include_tasks: 'roles/{{ notifier_role }}/tasks/main.yml'
+  include_role:
+    name: '{{ notifier_role }}'
   vars:
     message: >
       finished running role <b>aws-iam</b>
