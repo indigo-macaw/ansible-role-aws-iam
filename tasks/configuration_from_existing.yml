@@ -1,0 +1,86 @@
+---
+
+- import_tasks: account_authorization_details.yml
+
+- set_fact:
+    aws_iam_users: {}
+    aws_iam_groups: {}
+    aws_iam_roles: {}
+    aws_iam_policies: {}
+
+- set_fact:
+    aws_iam_users: >
+      {{
+        aws_iam_users
+        | combine({
+            item.UserName: {
+              "groups": item.GroupList,
+              "managed_policies": (item.AttachedManagedPolicies
+                                   | json_query("[*].PolicyArn"))
+            }
+          })
+      }}
+  loop: '{{ _aws_iam_aad.UserDetailList }}'
+  loop_control:
+    label: item.UserName
+
+- set_fact:
+    aws_iam_groups: >
+      {{
+        aws_iam_groups
+        | combine({
+            item.GroupName: {
+              "managed_policies": (item.AttachedManagedPolicies
+                                   | json_query("[*].PolicyArn"))
+            }
+          })
+      }}
+  loop: '{{ _aws_iam_aad.GroupDetailList }}'
+
+- set_fact:
+    aws_iam_roles: >
+      {{
+        aws_iam_roles
+        | combine({
+            item.RoleName: {
+              "managed_policies": (item.AttachedManagedPolicies
+                                   | json_query("[*].PolicyArn")),
+              "assume_role_policy": item.AssumeRolePolicyDocument
+            }
+          })
+      }}
+  loop: >
+    {{
+      _aws_iam_aad.RoleDetailList
+      | to_json
+      | from_json
+      | json_query("[? ! starts_with(Path, `/aws-service-role/`)]")
+    }}
+
+- set_fact:
+    aws_iam_policies: >
+      {{
+        aws_iam_policies
+        | combine({
+            item.PolicyName: {
+              "document": (item.PolicyVersionList
+                           | json_query("[? IsDefaultVersion == `true`]
+                                         .Document"))
+            }
+          })
+      }}
+  loop: >
+    {{
+      _aws_iam_aad.Policies
+      | to_json
+      | from_json
+      | json_query("[? ! starts_with(Arn, `arn:aws:iam::aws:policy/`)]")
+    }}
+
+- debug:
+    var: item
+  loop:
+    - '{{ aws_iam_users }}'
+    - '{{ aws_iam_groups }}'
+    - '{{ aws_iam_roles }}'
+    - '{{ aws_iam_policies }}'
