@@ -19,6 +19,9 @@
 - import_tasks: account_ids.yml
 
 
+- import_tasks: password_policy.yml
+
+
 - import_tasks: saml_provider_list.yml
 
 - include_tasks: saml_provider_create.yml
