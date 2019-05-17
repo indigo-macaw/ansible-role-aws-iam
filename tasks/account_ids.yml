@@ -8,4 +8,4 @@
         | default({})
         | combine({(item | regex_replace('aws-account-', '')): hostvars[item]["aws_account"]})
       }}
-  with_items: '{{ groups["aws-accounts"] }}'
+  with_items: '{{ groups["aws_accounts"] }}'

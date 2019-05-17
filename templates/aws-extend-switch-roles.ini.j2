@@ -1,6 +1,6 @@
 [{{ aws_profile }}]
 aws_account_id = {{ aws_profile }}
-{% for account in (groups["aws-accounts"] | sort) %}
+{% for account in (groups["aws_accounts"] | sort) %}
 {%
      if
        (
